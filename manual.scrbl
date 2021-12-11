@@ -17,7 +17,7 @@
 
 @title[#:version ""]{Simplisp, @nb{a toy interpreter}}
 @author{Jacob J. A. Koot}
-@(defmodule simplispbc/simplisp #:packages ())
+@(defmodule simplisp/simplisp #:packages ())
 @;@(defmodule "simplisp.rkt" #:packages ())
 
 @note{@red{WARNING}@(lb)
