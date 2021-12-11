@@ -1,6 +1,6 @@
 #lang racket
 
-(require "simplisp.rkt" #;simplispbc/simplisp)
+(require simplisp/simplisp)
 
 ; WARNING
 ;
@@ -23,9 +23,9 @@
 ;   (flush-output)
 ;  (close-output-port (current-output-port))))
 
-(parameterize ((current-output-port (open-output-nowhere)))
- (simplisp
- '(trace-align '5)
- '(trace-width 200)
- '(trace-option 'all #;'(start finis selfi))
- source-code))
+;(parameterize ((current-output-port (open-output-nowhere)))
+; (simplisp
+; '(trace-align '5)
+; '(trace-width 200)
+; '(trace-option 'all #;'(start finis selfi))
+; source-code))
