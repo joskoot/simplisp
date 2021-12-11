@@ -17,8 +17,8 @@
 
 @title[#:version ""]{Simplisp, @nb{a toy interpreter}}
 @author{Jacob J. A. Koot}
-@;@(defmodule simplispbc/simplisp #:packages ())
-@(defmodule "simplisp.rkt" #:packages ())
+@(defmodule simplispbc/simplisp #:packages ())
+@;@(defmodule "simplisp.rkt" #:packages ())
 
 @note{@red{WARNING}@(lb)
 Includes trace options, but with Racket CS the options@(lb)
@@ -28,8 +28,8 @@ Works well with Racket BC and Racket versions up to and including 7.9.@(lb)
 Problems with parameterization with Racket CS 8.0 and up.}
 
 @section[#:tag "1"]{Introduction}
-Module @hyperlink["simplisp.rkt"]{simplisp.rkt} provides:
-@;Module @hyperlink["../../simplisp.rkt"]{simplisp.rkt} provides:
+@;Module @hyperlink["simplisp.rkt"]{simplisp.rkt} provides:
+Module @hyperlink["../../simplisp.rkt"]{simplisp.rkt} provides:
 
 @inset{@Tabular[
 (("procedure"            @nbr[simplisp])
