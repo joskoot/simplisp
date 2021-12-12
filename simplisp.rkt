@@ -808,7 +808,7 @@ Conventions for names of variables
        (let ((value (env expr)))
         (when ($trace-varef)
          (parameterize* (($trace-option #f))
-          (print-truncated "~a : VAREF : ~s -> ~s" #f expr 'value)))
+          (print-truncated "~a : VAREF : ~s -> ~s" #f expr value)))
         value))
       ((and (pair? expr) (list? expr))
        (let ((id trace-id))
