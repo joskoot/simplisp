@@ -1353,7 +1353,7 @@ Conventions for names of variables
     (register-put! 'trace 'macro
      (λ (uargs env)
     #;(check-trace-uargs)
-      (parameterize* (($trace-option #t)) (@begin uargs env)))))
+      (parameterize* (($trace-option (*eval (car uargs) env))) (@begin (cdr uargs) env)))))
 
    #|─────────────────────────────────────────────────────────────────────────────────────────────────
 
