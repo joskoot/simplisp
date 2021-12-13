@@ -1610,7 +1610,7 @@ but without forming an intermediate stream-pair.}
 @defproc[#:kind "predicate" (stream? (obj any/c)) boolean?]{See @(SRFI41).}
 
 @Elemtag{trace}
-@defmacro[(trace option expr ...)]{
+@defform[(trace option expr ...)]{
 Same as @tt{(@nbpr{parameterize*} ((@nbpr{trace-option} @nbr[option])) @nbr[expr] ...)}}
 
 @Elemtag{trace-align}
@@ -1631,7 +1631,7 @@ The identification is right justified in a field of at least @nbr[width] charact
  (or/c
   boolean?
   'all
-  (listof (or/c 'start 'finis #;'value #;'varef 'selfi #;'assgn)))
+  (listof (or/c 'start 'finis 'value 'varef 'selfi 'assgn)))
  boolean? #:value #f]{
 Controls tracing.
 When @nber["trace-option"]{tracing} is enabled,
@@ -1641,9 +1641,9 @@ The details of tracing are controlled by the parameters:
 @inset{
   @nbpr{trace-start}@(lb)
   @nbpr{trace-finis}@(lb)
-@;  @nbpr{trace-value}@(lb)
-@;  @nbpr{trace-varef}@(lb)
-@;  @nbpr{trace-assgn}@(lb)
+  @nbpr{trace-value}@(lb)
+  @nbpr{trace-varef}@(lb)
+  @nbpr{trace-assgn}@(lb)
   @nbpr{trace-selfi}}
 
 When called with the @nbr[details]-argument, the @nbpr{trace-option} does the following:
@@ -1701,7 +1701,14 @@ Example:
 '(parameterize* ((trace-width 65) (trace-option 'all))
   (let* ((a 11) (b (* 2 a)))
    (set! a (+ a b))
-   (values a b (+ a b)))))]}
+   (values a b (+ a b)))))]
+
+
+@note{@red{WARNING}@(lb)
+With Racket CS the options @nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}
+cannot be used when simplisp traces its own source code.
+Works well with Racket BC and Racket versions up to and including 7.9.
+Problems with parameterization with Racket CS 8.0 and up.}}
 
 @Elemtag{trace-selfi}
 @defparam*[trace-selfi on/off any/c boolean? #:value #f]{See @nbpr{trace-option}.}
