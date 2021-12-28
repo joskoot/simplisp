@@ -67,7 +67,7 @@ The procedure is available as a @seclink["7"]{predefined variable} within @nbr[s
 
 @elemtag{source-code}
 @defidform[#:kind "symbolic expression" source-code]{
-Variable containing the @nbhl["simplisp.rkt"]{source code} of procedure @nbr[simplisp].
+Variable containing the @nbhl["../../simplisp.rkt"]{source code} of procedure @nbr[simplisp].
 The code can be evaluated @nb{by @(Rckt)} and by @nbr[simplisp] itself,
 yielding equivalent instances of @nbr[simplisp],
 although some of them can be much slower than others.
