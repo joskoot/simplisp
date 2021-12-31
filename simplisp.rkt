@@ -833,8 +833,6 @@ Conventions for names of variables
 
    ((bool-param-guard) (λ (x) (and x #t)))
 
-   ((*bool-param-guard) (λ (x) (and (eq? (system-type 'vm) 'racket) x #t)))
-
    (($trace-start)
     (register-put! 'trace-start #f (make-parameter #f bool-param-guard 'trace-start)))
 
@@ -842,13 +840,13 @@ Conventions for names of variables
     (register-put! 'trace-finis #f (make-parameter #f bool-param-guard 'trace-finis)))
 
    (($trace-value)
-    (register-put! 'trace-value #f (make-parameter #f *bool-param-guard 'trace-value)))
+    (register-put! 'trace-value #f (make-parameter #f bool-param-guard 'trace-value)))
 
    (($trace-varef)
-    (register-put! 'trace-varef #f (make-parameter #f *bool-param-guard 'trace-varef)))
+    (register-put! 'trace-varef #f (make-parameter #f bool-param-guard 'trace-varef)))
 
    (($trace-assgn)
-    (register-put! 'trace-assgn #f (make-parameter #f *bool-param-guard 'trace-assgn)))
+    (register-put! 'trace-assgn #f (make-parameter #f bool-param-guard 'trace-assgn)))
 
    (($trace-selfi)
     (register-put! 'trace-selfi #f (make-parameter #f bool-param-guard 'trace-selfi)))
