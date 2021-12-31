@@ -25,9 +25,7 @@ Includes trace options, but with Racket CS the options@(lb)
 @(hspace 5)@nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}@(lb)
 cannot be used when simplisp traces its own source code.@(lb)
 Works well with Racket BC and Racket versions up to and including 7.9.@(lb)
-Problems with parameterization with Racket CS 8.0 and up.
-When used on Racket CS, parameters @nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}
-have guards that always ensure that these options never are enabled.}
+Problems with parameterization with Racket CS 8.0 and up.}
 
 @section[#:tag "1"]{Introduction}
 @;Module @hyperlink["simplisp.rkt"]{simplisp.rkt} provides:
