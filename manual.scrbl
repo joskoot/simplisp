@@ -25,7 +25,9 @@ Includes trace options, but with Racket CS the options@(lb)
 @(hspace 5)@nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}@(lb)
 cannot be used when simplisp traces its own source code.@(lb)
 Works well with Racket BC and Racket versions up to and including 7.9.@(lb)
-Problems with parameterization with Racket CS 8.0 and up.}
+Problems with parameterization with Racket CS 8.0 and up.
+When used on Racket CS, parameters @nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}
+have guards that always ensure that these options never are enabled.}
 
 @section[#:tag "1"]{Introduction}
 @;Module @hyperlink["simplisp.rkt"]{simplisp.rkt} provides:
@@ -67,7 +69,7 @@ The procedure is available as a @seclink["7"]{predefined variable} within @nbr[s
 
 @elemtag{source-code}
 @defidform[#:kind "symbolic expression" source-code]{
-Variable containing the @nbhl["../../simplisp.rkt"]{source code} of procedure @nbr[simplisp].
+Variable containing the @nbhl["simplisp.rkt"]{source code} of procedure @nbr[simplisp].
 The code can be evaluated @nb{by @(Rckt)} and by @nbr[simplisp] itself,
 yielding equivalent instances of @nbr[simplisp],
 although some of them can be much slower than others.
