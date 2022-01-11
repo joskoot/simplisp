@@ -20,7 +20,7 @@
 @(defmodule simplisp/simplisp #:packages ())
 @;@(defmodule "simplisp.rkt" #:packages ())
 
-@note{@red{WARNING}@(lb)
+@note{@smaller{@smaller{@red{@smaller{@bold{WARNING}}}}}@(lb)
 Includes trace options, but with Racket CS the options@(lb)
 @(hspace 5)@nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}@(lb)
 cannot be used when simplisp traces its own source code.@(lb)
@@ -1786,6 +1786,8 @@ Synonym of @nbpr{lambda}.}
           (insert 'simplisp (reverse (remove 'simplisp (map string->symbol (add-elem-tag))))))
          (documented-and-sorted (sort documented symbol<?))
          (defined Special-vars))
+   (printf "Current directory: ~s~n" (current-directory))
+   (printf "Utensils directory: ~s~n" curdir)
    (printf "~nSpecial vars sorted: ~s ~n" (if (equal? documented-and-sorted documented) 'ok 'WRONG))
    (printf "~nList of documented variables~n~n")
    (for-each displayln documented-and-sorted)

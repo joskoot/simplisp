@@ -13,6 +13,8 @@
 
 @(provide (all-defined-out))
 
+@(define curdir (current-directory))
+
 @(define-syntax-rule (Interaction x ...)
   (interaction #:eval (make-base-eval #:lang '(begin (require racket "simplisp.rkt")
                                                      (print-as-expression #f))) x ...))
