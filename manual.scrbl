@@ -138,7 +138,7 @@ is called by taking the environment as an argument:
    (let ((a 1)) (f 'a (current-env)))
    (let ((a 2)) (f 'a (current-env))))))]}
 
-@item{Given an expression or subexpression consisting of an immutable non-empty list,
+@item{Given an expression or subexpression consisting of a non-empty list,
 @nbr[simplisp] evaluates the first element,
 which must yield an operator, id est,
 a procedure, a macro or the empty list.
