@@ -38,7 +38,7 @@ Module @hyperlink["../../simplisp.rkt"]{simplisp.rkt} provides:
 
 Simplisp is a meta-recursive interpreter.
 Its source-code consists of one single symbolic expression
-in a proper intersection of the implemented language and
+in @nb{a proper} intersection of the implemented language and
 @nbhl["file:///C:/Program%20Files/Racket/doc/reference/index.html"]{@tt{racket/base}}.
 Simplisp does no compilation and has no expansion phase prior to the evaluation proper.
 Macro calls are interpreted on the fly during evaluation.
@@ -63,7 +63,8 @@ it receives the values of its arguments.
 @nbrl[simplisp]{Simplisp} evaluates the top-expressions from left to right and
 returns the value or multiple value of the last one.
 When called without arguments, procedure @nbr[simplisp] immediately returns @(Void).
-The procedure is available as a @seclink["7"]{predefined variable} within @nbr[simplisp] itself too.}
+The procedure is available as @nb{a @seclink["7"]{predefined variable}}
+within @nbr[simplisp] itself too.}
 
 @elemtag{source-code}
 @defidform[#:kind "symbolic expression" source-code]{
@@ -143,7 +144,7 @@ is called by taking the environment as an argument:
 which must yield an operator, id est,
 a procedure, a macro or the empty list.
 Accordingly, the expression or subexpression is a procedure call,
-a macro call or a @nbpr{null-form}.
+@nb{a macro} call or a @nbpr{null-form}.
 
 @itemlist[@item{@bold{Procedure call}@(lb)
 The arguments in a procedure call are evaluated from left to right
@@ -180,7 +181,7 @@ yields the same as:
 (simplisp '(+ 1 2 3 4 5 6 7))]}
 
 @item{@bold{Macro call}@(lb)
-Whether or not, when, how and in which order arguments are evaluated in case of a macro call,
+Whether or not, when, how and in which order arguments are evaluated in case of @nb{a macro} call,
 depends on the macro and its arguments.
 New macros can be made at run time with procedure @nbpr{make-macro} and macro @nbpr{macro}.
 Macros are first class data and can be passed around, just like procedures:
