@@ -194,8 +194,7 @@ Macros are first class data and can be passed around, just like procedures:
 For recollection of a value from the clean environment, bypassing the local environment.
 See the @nber["null-form"]{related documentation}.}]}
 
-@item{Everything else than a symbol or an immutable proper list is self-evaluating,
-the empty list included.
+@item{Everything else than a symbol or a non-empty proper list is self-evaluating.
 
 @Interaction[
 (simplisp (cons 1 2))]
