@@ -77,7 +77,7 @@ although some of them can be much slower than others.
 @section[#:tag "2"]{Simplisp ≠ Racket}
 
 @nbrl[simplisp]{Simplisp} differs very much from @(Rckt).
-It is much smaller and much simpler. @nb{It is a toy}.
+It is much smaller and much simpler. @nb{It's a toy}.
 
 @itemlist[#:style 'ordered
 @item{Macros are first class run-time data, just like procedures.
