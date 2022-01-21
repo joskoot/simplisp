@@ -56,7 +56,7 @@ More details in section @nbsr["2"].
 
 @Elemtag{simplisp}
 @defproc[
-(simplisp (top-expr #,(black @nbr[any/c] " evaluating to " @nbr[any])) ... ) any]{
+(simplisp (top-expr any/c) ... ) any]{
 Because procedure @nbr[simplisp] is called by value,
 it receives the values of its arguments.
 @nb{We call} these values `top-expressions'.
