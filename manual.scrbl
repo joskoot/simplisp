@@ -21,11 +21,13 @@
 @;@(defmodule "simplisp.rkt" #:packages ())
 
 @note{@smaller{@smaller{@red{@smaller{@bold{WARNING}}}}}@(lb)
-Includes trace options, but with Racket CS the options@(lb)
-@(hspace 5)@nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}@(lb)
-cannot be used when simplisp traces its own source code.@(lb)
-Works well with Racket BC and Racket versions up to and including 7.9.@(lb)
-Problems with parameterization with Racket CS 8.0 and up.}
+Includes trace options, but with Racket CS the options
+@nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}
+cannot be used when simplisp traces its own source code
+as in @nb{@tt{(@nbr[simplisp] (@nber["trace"]{trace} 'all) @nbr[source-code])}}.
+Works well with Racket BC and Racket versions up to and including 7.9.
+Problems with parameterization with Racket CS 8.0 and up.
+No tracing problems with any other code.}
 
 @section[#:tag "1"]{Introduction}
 @;Module @hyperlink["simplisp.rkt"]{simplisp.rkt} provides:
