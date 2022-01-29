@@ -39,7 +39,7 @@ Module @hyperlink["../../simplisp.rkt"]{simplisp.rkt} provides:
  ("symbolic expression"  @nbr[source-code]))
 #:sep (hspace 3)]}
 
-Simplisp is a meta-recursive interpreter.
+Simplisp is a @seclink["meta-recursion"]{meta-recursive} interpreter.
 Its source-code consists of one single symbolic expression
 in @nb{a proper} intersection of the implemented language and
 @nbhl["file:///C:/Program%20Files/Racket/doc/reference/index.html"]{@tt{racket/base}}.
@@ -77,7 +77,7 @@ yielding equivalent instances of @nbr[simplisp],
 although some of them can be much slower than others.
 @nb{See section @secref["5"].}}
 
-@section{Meta-recursion}
+@section[#:tag "meta-recursion"]{Meta-recursion}
 
 @nbrl[simplisp]{Simplisp} is meta-recursive in strong sense,
 that is, both left associative and right associative:
