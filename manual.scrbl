@@ -77,6 +77,26 @@ yielding equivalent instances of @nbr[simplisp],
 although some of them can be much slower than others.
 @nb{See section @secref["5"].}}
 
+@section{Meta-recursion}
+
+@nbrl[simplisp]{Simplisp} is meta-recursive in strong sense,
+that is, both left associative and right associative:
+
+Right association:
+
+@Interaction[
+(simplisp `(,source-code '(,source-code '(add1 3))))]
+
+Left association:
+
+@Interaction[
+(((simplisp source-code) source-code) '(add1 3))]
+
+Mixed association:
+
+@Interaction[
+((simplisp source-code) `(,source-code '(add1 3)))]
+
 @section[#:tag "2"]{Simplisp ≠ Racket}
 
 @nbrl[simplisp]{Simplisp} differs very much from @(Rckt).
