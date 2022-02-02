@@ -875,7 +875,9 @@ Can be used for the @tt{@italic{else-clause}} in a @nbpr{cond}-form
 Variable containing the unique @elemref["environment"]{environment} with empty local layer.
 It includes the clean environment, though.
 @Interaction[
-(simplisp '(eq? (current-env) empty-env))]}
+(simplisp '(eq? (current-env) empty-env))]
+@Interaction[
+(simplisp '(empty-env 'list))]}
 
 @Elemtag{empty-env?}
 @defproc[(empty-env? (obj any/c)) boolean?]{
