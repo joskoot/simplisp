@@ -1047,7 +1047,7 @@
       (let ((ids (car uargs)) (expr (cadr uargs)))
        (let
         ((old-vals (map env ids))
-         (vals (call-with-values (λ () (*eval expr env)) list)))
+         (vals (eval-to-list expr env)))
         (for-each env ids vals)
         (apply values old-vals))))))
 
