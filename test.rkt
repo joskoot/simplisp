@@ -1,62 +1,65 @@
 #lang racket
 
-(require "simplisp.rkt" #;simplispbc/simplisp test/test)
+(require simplisp/simplisp test/test)
 
-(define simple simplisp)
-;(define simple (simplisp source-code))
-;(test 0 ((print (parameterize ((current-output-port (open-output-nowhere)))
-;                 (simplisp '(trace-option #t) source-code)))) #f #:output "#<procedure:simplisp>")
+(define (resetted-simplisp . x) (apply simplisp '(reset) x))
 
-(define (xprint x) (printf "~s " x))
+(define (print-with-space x) (printf "~s " x))
 
-(test 1 ((simple '(reset) '(let ((a 1)) (list (set! a 2) a)))) '((1 2)))
-(test 2 ((simple '((lambda (x y z) (z x y)) 2 3 +))) '(5))
+(test 1 ((resetted-simplisp '(reset) '(let ((a 1)) (list (set! a 2) a)))) '((1 2)))
+(test 2 ((resetted-simplisp '((lambda (x y z) (z x y)) 2 3 +))) '(5))
 
 (test 3
- ((simple '((make-macro 'my-macro (λ (uargs env) (printf "~s~n~s~n" uargs env))) aap noot mies)))
+ ((resetted-simplisp
+  '((make-macro 'my-macro (λ (uargs env) (printf "~s~n~s~n" uargs env))) aap noot mies)))
  #f #:output "(aap noot mies) #<empty-env>")
 
-(test 4 ((simple '(let loop ((n 5)) (if (zero? n) 1 (* n (loop (sub1 n))))))) '(120))
-(test 5 ((simple '(let loop ((n 5) (r 1)) (if (zero? n) r (loop (sub1 n) (* n r)))))) '(120))
+(test 4 ((resetted-simplisp
+         '(let loop ((n 5)) (if (zero? n) 1 (* n (loop (sub1 n))))))) '(120))
+(test 5 ((resetted-simplisp
+         '(let loop ((n 5) (r 1)) (if (zero? n) r (loop (sub1 n) (* n r)))))) '(120))
 
 (test 6
- ((simple `(let ((p (make-promise 'pp 'lazy (λ () (,xprint 'ppp) 'pppp))))
-               (,xprint (promise-state p))
-               (,xprint (force p))
-               (,xprint (promise-state p))
-               (,xprint (force p))
-               (,xprint p))))
+ ((resetted-simplisp
+  `(let ((p (make-promise 'pp 'lazy (λ () (,print-with-space 'ppp) 'pppp))))
+        (,print-with-space (promise-state p))
+        (,print-with-space (force p))
+        (,print-with-space (promise-state p))
+        (,print-with-space (force p))
+        (,print-with-space p))))
  #f #:output "lazy ppp pppp forced pppp #<promise:pp:forced>")
 
 (test 7
- ((define-values (make-p p? p-delay p-lazy p-force) (simple '(make-promise-type 'P)))
-  (simple `(let ((p (,make-p 'pp 'lazy (λ () (,xprint 'ppp) 'pppp))))
-               (,xprint (promise-state p))
-               (,xprint (force p))
-               (,xprint (,p-force p))
-               (,xprint (promise-state p))
-               (,xprint (force p))
-               (,xprint (,p-force p))
-               (,xprint p)
-               (,xprint (force p)))))
+ ((define-values (make-p p? p-delay p-lazy p-force) (resetted-simplisp '(make-promise-type 'P)))
+  (resetted-simplisp
+  `(let ((p (,make-p 'pp 'lazy (λ () (,print-with-space 'ppp) 'pppp))))
+        (,print-with-space (promise-state p))
+        (,print-with-space (force p))
+        (,print-with-space (,p-force p))
+        (,print-with-space (promise-state p))
+        (,print-with-space (force p))
+        (,print-with-space (,p-force p))
+        (,print-with-space p)
+        (,print-with-space (force p)))))
  #f #:output "lazy #<P:pp:lazy> ppp pppp forced #<P:pp:forced> pppp #<P:pp:forced> #<P:pp:forced>")
 
 (test 8
- ((simple '(let* ((a 1) (b (add1 a)) (a (add1 b))) (list a b))))
+ ((resetted-simplisp '(let* ((a 1) (b (add1 a)) (a (add1 b))) (list a b))))
  '((3 2)))
 
 (test 9
- ((simple '(letrec ((! (λ (n) (if (zero? n) 1 (* n (fact (sub1 n)))))) (fact !)) (fact 5))))
+ ((resetted-simplisp
+  '(letrec ((! (λ (n) (if (zero? n) 1 (* n (fact (sub1 n)))))) (fact !)) (fact 5))))
  '(120))
 
 (test 10
- ((simple
+ ((resetted-simplisp
   '(letrec ((! (λ (n) (fact n 1)))
             (fact (λ (n m) (if (zero? n) m (fact (sub1 n) (* n m))))))
            (! 5)))) '(120))
 
 (test 11
- ((simple
+ ((resetted-simplisp
   '(letrec
     ((str-cdr (λ (str) (force (cdr str))))
      (make-str (λ (next n) (cons n (lazy (make-str next (next n))))))
@@ -73,27 +76,27 @@
      (P
       (λ (str)
        (cons (car str) (lazy (P (Q str (car str))))))))
-    (frontier (P (str-cdr (str-cdr ints))) 10))))
- '((2 3 5 7 11 13 17 19 23 29)))
+    (frontier (P (str-cdr (str-cdr ints))) 20))))
+ '((2 3 5 7 11 13 17 19 23 29 31 37 41 43 47 53 59 61 67 71)))
 
 (test 12
- ((simple '(force (lazy (print (call-with-values (λ () (make-promise-type 'P)) list))))))
+ ((resetted-simplisp '(force (lazy (print (call-with-values (λ () (make-promise-type 'P)) list))))))
  #f
  #:output
  "(#<procedure:make-P> #<procedure:P?> #<macro:P:delay> #<macro:P:lazy> #<procedure:force-P>)")
 
 (test 13
- ((simple
+ ((resetted-simplisp
   '(let-values (((a b c) (values 1 2 3)) ((b c d) (values 4 5 6)) ((c d e) (values 7 8 9)))
     (list a b c d e)))) '((1 4 7 8 9)))
 
 (test 14
- ((simple
+ ((resetted-simplisp
   '(let*-values (((a b c) (values 1 2 3)) ((a b c) (values (add1 c) (add1 b) (add1 a))) ((e) 4))
     (list a b c e)))) '((4 3 2 4)))
 
 (test 15
- ((simple 
+ ((resetted-simplisp 
   '(letrec-values
     (((even odd)
       (values
@@ -104,32 +107,33 @@
 
 (test 16
  ((equal?
-   (simplisp
+   (resetted-simplisp
    '(racket
     '(simplisp
      '(racket
       '(simplisp
        '(racket
         '(simplisp 'special-vars)))))))
-   (simplisp 'special-vars))) '(#t))
+   (resetted-simplisp 'special-vars))) '(#t))
 
-(test 17 ((simple '(let ((a 3) (b 4) (+ *)) (eval '(+ a b) (current-env))))) '(12))
+(test 17 ((resetted-simplisp '(let ((a 3) (b 4) (+ *)) (eval '(+ a b) (current-env))))) '(12))
 
 (test 18
- ((simple '(let ((a 3) (b 4)) (with-env (current-env) (list a b))))) '((3 4)))
+ ((resetted-simplisp '(let ((a 3) (b 4)) (with-env (current-env) (list a b))))) '((3 4)))
 
 (test 19
- ((simple '(let ((add1 3) (sub1 4)) (with-env #f (list add1 sub1))))) (list (list add1 sub1)))
+ ((resetted-simplisp
+  '(let ((add1 3) (sub1 4)) (with-env #f (list add1 sub1))))) (list (list add1 sub1)))
 
 (test 20
- ((simple
+ ((resetted-simplisp
   '(let ((add1 3) (sub1 4))
     (list
      (with-env 'copy (set! add1 40) (set! sub1 50) (list add1 sub1))
      (list add1 sub1))))) '(((40 50) (3 4))))
 
 (test 21
- ((simplisp
+ ((resetted-simplisp
  '(letrec
    ((stream-map
      (λ (proc a b)
@@ -164,14 +168,14 @@
   34 55")
 
 (test 22
- ((simplisp
+ ((resetted-simplisp
   '(catch-exn (λ (exn) (printf "~a~n" (exn-message exn)) 'catched)
     (printf "aap~n") (error "noot") this is ignored)))
  '(catched)
  #:output "aap noot")
 
 (test 23
- ((simplisp
+ ((resetted-simplisp
   '(global-define a 1)
   '(global-define-values (b c d) (values 2 3 4))
   '(printf "~s~n" (global-ref c))
@@ -179,11 +183,17 @@
  '(1 2 4) #:output "3")
 
 (test 24
- ((simplisp
+ ((resetted-simplisp
   '(global-define a 1)
   '(global-define-values (b c d) (values 2 3 4))
   '(printf "~s" (call-with-values (λ () (global-set!-values (a b c d) (values 10 20 30 40))) list))
   '(global-ref-values a b c d)))
  '(10 20 30 40) #:output "(1 2 3 4)")
+
+(test 25
+ ((resetted-simplisp
+  '(let-values (((a b c) (values 1 2 3)))
+    (list (set!-values (a b c) (values 10 20 30)) a b c))))
+ '((1 2 3 10 20 30)))
 
 (test-report)
