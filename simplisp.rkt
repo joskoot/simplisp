@@ -2,97 +2,22 @@
 
 (provide simplisp source-code)
 
-#|════════════════════════════════════════════════════════════════════════════════════════════════════
-
-                                            ┌──────────┐
-                                            │ simplisp │
-                                            └──────────┘
-
-══════════════════════════════════════════════════════════════════════════════════════════════════════
-
-Introduction
-
-Simplisp is a meta-recursive interpreter.
-Its source-code can be evaluated by simplisp itself and by racket:
-
-   simplisp : (simplisp source-code)
-   racket   : (eval source-code (make-base-namespace))
-
-Related modules:
-
-   manual.scrbl            Produces documentation.
-
-   scribble-utensils.rkt   Used by module "manual.rkt".
-
-   test.rkt                Tests. It requires a module of the same name from another directory.
- 
-   variables.rkt           Analizes the lists of special and clean predefined variables and checks
-                           that the latter includes all free variables of the source-code, which is
-                           a necessary (but not sufficient) condition for meta-recursivity.
-
-══════════════════════════════════════════════════════════════════════════════════════════════════════
-
-To quote or not to quote?                                                                           |#
-
 (define-syntax-rule
  (define-with-source-code (simplisp source-code)         expr        )
- (define-values           (simplisp source-code) (values expr 'expr)))                              #|
-
-This syntax-rule is not part of the interpreter. It accepts the source-code and binds both the
-source-code and the interpreter, id est, the evaluated source-code. The syntax-rule is not necessary
-because the quoted source-code can be evaluated by racket as shown above. However, quoting the
-source-code would have the disadvantage that DrRacket would provide much less usefull information.
-
-══════════════════════════════════════════════════════════════════════════════════════════════════════
-
-Conventions for names of variables
-
-   *‹var› : asterix to avoid confusion with a racket procedure of the name ‹var›.
-
-   $‹var› : for special variables, registered to be put into the clean environment.
-
-   @‹var› : for variables containing a macro-proc, registered such that the related macro will be put
-            into the clean environment.
-
-════════════════════════════════════════════════════════════════════════════════════════════════════|#
+ (define-values           (simplisp source-code) (values expr 'expr)))
 
 (define-with-source-code (simplisp source-code)
 
  (letrec-values
 
-  (#|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 1 : Register
-
-   Simplisp borrows variables from racket by means of a base-namespace in variable clean-environment.
-   A special variable is one specific for simplisp, not or not directly borrowed from racket.
-   In particular, all macros are stored in special variables. The register is used to gather all
-   objects and names for the special variables:
-
-     register = ((name renamer object) ...)
-
-     name     : symbol?
-     renamer  : (or/c #f 'proc 'macro 'super)
-     object   : (case renamer
-                 ((proc)  procedure?)       ; procedure to be renamed
-                 ((macro) macro-procedure?) ; macro-procedure to be transformed to a macro
-                 ((super) super-type?)      ; struct to be renamed with procedure set-super-type-name!
-                 (else any/c))              ; anything else, to be stored as is
-
-   The last step in the source-code before returning the interpreter consists of calling procedure
-   fill-clean-environment, which puts all registered objects into the clean-environment, possibly
-   replacing Racket objects already present in the base-namespace used for the clean-environment.
-   After returning the interpreter the clean-environment will never again be mutated and all objects
-   of this section become garbage.                                                                  |#
-
-   ((register) '())
+  (((register) '())
 
    ((register-put!)
     (λ (name renamer object)
      (set! register (cons (list name renamer object) register))
      object))
 
-   ((fill-clean-environment!) ; Places special vars in the clean-environment and
+   ((fill-clean-environment!) ; Places special variables in the clean-environment and
     (λ ()                     ; returns a sorted list of the names of all special variables.
      (for-each enter-in-clean-environment! register)
      ; At the end of the source-code the following will become garbage:
@@ -120,22 +45,13 @@ Conventions for names of variables
       ((macro) ($make-macro name object))
       (else (error 'source-code "unknown renamer: ~s~n  for variable: ~s" renamer name)))))
 
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 2 : Clean environment
-
-   The clean-environment is a base-namespace that is updated at the end of the construction of the
-   interpreter such as to receive all special variables. This is done by procedure fill-clean-
-   environment!. After completion of building the interpreter, the clean-environment will never be
-   mutated again.                                                                                   |#
-
    ((clean-environment) (make-base-namespace))
 
-    ((clean-ref)
-     (λ (id)
-      (namespace-variable-value id #t
-       (λ () (error 'varef "unbound variable: ~s" id))
-       clean-environment)))
+   ((clean-ref)
+    (λ (id)
+     (namespace-variable-value id #t
+      (λ () (error 'varef "unbound variable: ~s" id))
+      clean-environment)))
 
    ((clean-set!)
     (λ (id value)
@@ -158,7 +74,7 @@ Conventions for names of variables
    (($special-vars)
     (register-put! 'special-vars 'proc ; A thunk, because we must wait until fill-clean-environment!
      (λ () special-var-names)))        ; has assigned the list special-var-names.
-   
+
    (($borrowed-vars)
     (register-put! 'borrowed-vars 'proc
      (λ () (remove* ($special-vars) ($clean-vars)))))
@@ -168,16 +84,6 @@ Conventions for names of variables
      (λ (uargs env)
       (sort (hash-keys (env-hash env)) symbol<?))))
 
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 3 : Already register some variables.
-
-   We add procedure make-list to the clean-environment. It is not available in a base-namespace.
-   We retrieve Racket's procedure eval under the name racket-eval, name 'eval' being reserved for a
-   special variable. Variables sort and apply are not retrievable from a base-namespace although
-   procedure namespace-mapped-symbols does list them and they can be used in #lang racket/base.
-   Therefore we add them too. In addition we register variable else.                                |#
-
    ((racket-eval $make-list $call-with-values)
     (let* ((racket-eval (clean-ref 'eval)))
      (parameterize* ((current-namespace clean-environment)) ; Use racket-eval here for the require-
@@ -186,12 +92,8 @@ Conventions for names of variables
      (clean-set! 'apply apply)                              ; would destroy meta-recursivity.
      (clean-set! 'call-with-values call-with-values)
      (register-put! 'else #f 'else)
-     (values racket-eval (clean-ref 'make-list) (clean-ref 'call-with-values))))                   #|
-
-   When the interpreter is evaluating its own source-code with the $trace-option enabled, this
-   parameter already is needed during the construction of struct-types. Therefore we bind and
-   register it here.                                                                                |#
-
+     (values racket-eval (clean-ref 'make-list) (clean-ref 'call-with-values))))
+   
    ((trace-option-guard)
     (λ (x)
      (case x
@@ -228,14 +130,6 @@ Conventions for names of variables
     (register-put! 'trace-option #f
      (make-parameter #f trace-option-guard 'trace-option)))
 
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 4 : Super-type for all struct-types.
-
-   Contains a name for the object or #f if the name is not yet known. If the object has no name yet,
-   a name may be given by procedure fill-clean-environment! or a name may be inferred when the
-   interpreter runs and binds an unnamed super-type struct to a variable.                           |#
-
    ((inspector) (make-sibling-inspector))
 
    ((super-type super-type? super-type-name set-super-type-name!)
@@ -258,13 +152,6 @@ Conventions for names of variables
       (make-struct-field-accessor acc 0 'name)
       (make-struct-field-mutator  mut 0 'name))))
 
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 5 : Closures
-
-   Closures are structs with procedure property.
-   Procedure make-closure is used by macros lambda and λ.                                           |#
-
    ((make-closure $closure?)
     (let*-values
      (((printer)
@@ -284,13 +171,6 @@ Conventions for names of variables
         '(0)     ; immutable proc
         #f)))    ; no guard
      (values constr (register-put! 'closure? #f pred))))
-
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 6 : Macros
-
-   Macros are structs containing a procedure (-> unevaluated-args env? any/c).
-   The structs have no procedure property.                                                          |#
 
    (($make-macro $macro? macro-proc)
     (let*-values
@@ -323,15 +203,6 @@ Conventions for names of variables
       (register-put! 'make-macro #f constr)
       (register-put! 'macro? #f pred)
       (make-struct-field-accessor acc 0 'proc))))
-
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 7 : Local environments
-
-   Environments have procedure property.
-
-   (environment symbol) -> value
-   (environment symbol new-value) -> old value of the variable, the new-value being assigned.       |#
 
    ((env-type make-env $env? env-hash)
     (let*-values
@@ -391,11 +262,13 @@ Conventions for names of variables
 
    ((env-set!)
     (λ (env id value)
-     (when ($trace-assgn)
-      (print-truncated "~a : ASSGN : ~s <- ~s" #f id value))
      (let ((bx (hash-ref (env-hash env) id #f)))
       (cond
-       (bx (let ((old (unbox bx))) (set-box! bx (infer-name id value)) old))
+       (bx
+        (let ((old (unbox bx)))
+         (when ($trace-assgn)
+          (print-truncated "~a : ASSGN : ~s = ~s <- ~a = ~a" #f id value id old))
+          (set-box! bx (infer-name id value)) old))
        (else (error 'assignment
         "allowed for locally bound vars only~n  var : ~s~n  value : ~s"
         id value))))))
@@ -434,10 +307,6 @@ Conventions for names of variables
         (hash-map (env-hash env)
          (λ (var bx) (cons var (box (unbox bx))))))))))
 
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 8 : Unique object: undefined                                                             |#
-
    (($undefined $undefined?)
     (let*-values
      (((printer)
@@ -459,26 +328,6 @@ Conventions for names of variables
      (values
       (register-put! 'undefined #f (constr))
       (register-put! 'undefined? #f pred))))
-
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 9 : Promises
-
-   A promise has a name (from the super-type), a state and content:
-
-   state     content
-   -----     -------
-   lazy      (-> any/c)
-   delay     (-> any/c)
-   forced    any/c
-   error     exn?
-   running   n.a.
-
-   Distinct promise types can be defined by means of procedure $make-promise-type.
-   They are defined in terms of a super-type of promises. Each promise-type has its own macro lazy,
-   macro delay, constructor, predicate and procedure force.
-
-   The super-type of promises:                                                                      |#
 
    ((promise-type $promise-state promise-content set-promise-state! set-promise-content!)
     (letrec-values
@@ -599,8 +448,6 @@ Conventions for names of variables
       (set-promise-state! p 'running)
       (call-with-exception-handler (promise-exn-handler p) (promise-content p))))
 
-   ; Predefined promise type:
-
    ((ignore-0)
     (let-values
      (((make-promise promise? delay lazy force) ($make-promise-type 'promise)))
@@ -609,24 +456,6 @@ Conventions for names of variables
      (register-put! 'delay 'super delay)
      (register-put! 'lazy  'super lazy)
      (register-put! 'force 'proc force)))
-
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 10 : Streams
-
-   Procedure make-stream-type yields 8 values:
-
-   macro     stream-lazy
-   macro     stream-cons
-   macro     stream
-   procedure stream-car
-   procedure stream-cdr
-   predicate stream?
-   predicate stream-null?
-   object    stream-null
-
-   The returned macros, procedures, predicates and object
-   only apply to the stream-type they belong to.                                                    |#
 
    (($make-stream-type)
     (register-put! 'make-stream-type 'proc
@@ -694,8 +523,6 @@ Conventions for names of variables
         stream-pair?
         stream-null)))))
 
-   ; Predefined stream type:
-
    ((ignore-1)
     (let-values
      (((stream-lazy
@@ -718,12 +545,6 @@ Conventions for names of variables
      (register-put! 'stream-pair? #f stream-pair?)
      (register-put! 'stream-null  #f stream-null)))
 
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 11 : The interpreter proper.
-
-   An uarg is an unevaluated argument.                                                              |#
-
    ((simplisp)
     (register-put! 'simplisp #f
      (procedure-rename
@@ -737,8 +558,6 @@ Conventions for names of variables
            ((null? exprs) (*eval expr $empty-env))
            (else (*eval expr $empty-env) (loop (car exprs) (cdr exprs))))))))
      'simplisp)))
-
-   ; Argument tail? is true if the expr is in tail position.
 
    ((*eval)
     (λ (expr env)
@@ -783,20 +602,10 @@ Conventions for names of variables
            (map (λ (i uarg) (format "~n  unevaluated arg ~s: ~s" i uarg))
             (build-list (length uargs) add1) uargs)))))))))
 
-   ; () is a special operator that retrieves a value from the clean environment, bypassing the local
-   ; environment. Notice that in simplisp the empty list is self-evaluating. Every other self-
-   ; evaluating object that is interned for relation equal? would do. However, the object must not be
-   ; a symbol because it must allow access to the clean environment even when all clean variables
-   ; are shadowed by local bindings.
-
    ((apply-null) ; Retrieves a value from the clean environment.
     (λ (uargs)
      (check-null-form uargs)
      (clean-ref (car uargs))))
-
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 12 : Evaluator that prints a record of evaluation steps.                                 |#
 
    ((tracing-eval)
     (λ (expr env)
@@ -887,10 +696,6 @@ Conventions for names of variables
        (str (apply format fmt (trace-id-align id) rest))
        (n (string-length str)))
       (printf "~a~n" (if (and m (> n m)) (string-append (substring str 0 m) " ...") str)))))
-   
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 13 : Macro begin.                                                                        |#
 
    ((@begin)
     (let
@@ -907,10 +712,6 @@ Conventions for names of variables
      (cond
       ((null? kdr) (*eval kar env))
       (else (*eval kar env) (begin-help (car kdr) (cdr kdr) env)))))
-
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 14 : Macros quote and quasiquote.                                                        |#
 
    ((@quote)
     (register-put! 'quote 'macro
@@ -962,10 +763,6 @@ Conventions for names of variables
    ((qq-symbol)  'quasiquote)
    ((uq-symbol)  'unquote)
    ((uqs-symbol) 'unquote-splicing)
-
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 15 : Binding forms and related macros and procedures.                                    |#
 
    ((@env)
     (register-put! 'current-env 'macro
@@ -1130,11 +927,7 @@ Conventions for names of variables
       (call/ec
        (λ (ec) (@begin (cdr uargs) (extend-env env (list (car uargs)) (list ec))))))))
 
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 16 : Conditional forms                                                                   |#
-
-   ((@if)
+  ((@if)
     (register-put! 'if 'macro
      (λ (uargs env)
       (check-if uargs)
@@ -1222,10 +1015,6 @@ Conventions for names of variables
          (val val)
          (else (or-help (car uargs) (cdr uargs) env))))))))
 
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 17 : Miscelaneous macros and procedures                                                  |#
-
    ((eval-to-list)
     (λ (uarg env)
      ($call-with-values (λ () (*eval uarg env)) list)))
@@ -1258,7 +1047,7 @@ Conventions for names of variables
       (let ((ids (car uargs)) (expr (cadr uargs)))
        (let
         ((old-vals (map env ids))
-         (vals (eval-to-list (λ () (*eval expr env)) list)))
+         (vals (call-with-values (λ () (*eval expr env)) list)))
         (for-each env ids vals)
         (apply values old-vals))))))
 
@@ -1352,10 +1141,6 @@ Conventions for names of variables
      (λ (uargs env)
     #;(check-trace-uargs)
       (parameterize* (($trace-option (*eval (car uargs) env))) (@begin (cdr uargs) env)))))
-
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 18 : Global table parameter and associated procedures                                    |#
 
    ((make-global-table $global-table? global-table-hash)
     (let*-values
@@ -1501,13 +1286,7 @@ Conventions for names of variables
          (global-ids (map (λ (x) (if (symbol? x) x (cadr x))) id-list))
          (local-ids (map (λ (x) (if (symbol? x) x (car x))) id-list))
          (vals (map global-ref global-ids)))
-        (@begin body (extend-env env local-ids vals)))))))                 
-
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 19 : Helper functions that check arguments of special procedures and macro forms
-
-   (much to do yet)                                                                                 |#
+        (@begin body (extend-env env local-ids vals)))))))
 
    ((quote-uargs?) (λ (x) (= (length x) 1)))
    ((lambda-uargs?) (λ (x) (and (pair? x) (formals? (car x)))))
@@ -1550,19 +1329,15 @@ Conventions for names of variables
    ((check-global-ref)    (make-check 'global-vars-ref void))
    ((check-global-define) (make-check 'global-vars-set! void))
 
-   #|─────────────────────────────────────────────────────────────────────────────────────────────────
-
-   Section 20
-
-   Put all registered variables in the clean-environment and return interpreter simplisp. Also puts
-   the sorted list of the names of the registered variables in variable special-var-names (used by
-   procedure $special-vars).                                                                        |#
-
    ((special-var-names) (fill-clean-environment!)))
 
-  simplisp))
+ simplisp))
 
-#|────────────────────────────────────────────────────────────────────────────────────────────────────
-The end.
+#| The end.
 
-aap noot mies wim zus jet teun vuur gijs lam kees bok weide does hok duif schapen                   |#
+aap noot mies wim zus jet teun vuur gijs lam kees bok weide does hok duif schapen |#
+(simplisp
+ '(let-values (((a b c) (values 1 2 3)))
+   (set!-values (a b c) (values 10 20 30))))
+
+
