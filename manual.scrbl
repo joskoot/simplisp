@@ -350,17 +350,46 @@ Data can be exchanged between @nbr[simplisp] and @(Rckt),
 including procedures, lists, vectors, characters, strings, boxes, sets, hash-tables,
 multiple values and much more.
 
+Procedures can be exchanged between @(Rckt) and @(nbr simplisp).@(lb)
+For example, a procedure made by @(nbr simplisp) can be called from @(Rckt):
+
+@Interaction[
+(define proc (simplisp '(λ (x) (add1 (* 2 x)))))
+(proc 3)]
+
+Using a @(nbr simplisp) procedure as argument of @nbr[map] in @(Rckt):
+
+@Interaction[
+(define proc (simplisp '(lambda (x y z) (+ x y z))))
+(map proc '(1 2 3) '(10 20 30) '(100 200 300))]
+
+Using a @(Rckt) procedure as argument of @nbr[map] in @(nbr simplisp):
+
+@Interaction[
+(define (plus*10 x y z) (* 10 (+ x y z)))
+(simplisp `(map ,plus*10 '(1 2 3) '(10 20 30) '(100 200 300)))
+(simplisp `(,map ,plus*10 '(1 2 3) '(10 20 30) '(100 200 300)))]
+
+The only difference between procedures of @(Rckt) and those of @(nbr simplisp)
+is that the latter always have @tt{#(struct:arity-at-least 0)}:
+
+@Interaction[
+(procedure-arity (λ (x y z) "who-cares?"))
+(procedure-arity (simplisp '(λ (x y z) "who-cares?")))
+(simplisp '(procedure-arity (λ (x y z) "who-cares?")))]
+
+This does not mean that a @(nbr simplisp) procedure
+does not check the number of its arguments:
+
+@Interaction[
+(simplisp '((lambda (x y z) "who cares?") 1 2 3 4))
+((simplisp '(lambda (x y z) "who cares?")) 1 2)]
+
 Exchange of a box between @(nbr simplisp) and @(Rckt):
 
 @Interaction[
 (unbox (simplisp '(box "to be unboxed")))
 (simplisp `(unbox ,(box "to be unboxed")))]
-
-Calling a procedure made by @(nbr simplisp) from @(Rckt):
-
-@Interaction[
-(define proc (simplisp '(λ (x) (add1 (* 2 x)))))
-(proc 3)]
 
 A procedure made by @(nbr simplisp) is insensitive to bindings in @(Rckt):
 
@@ -542,16 +571,17 @@ For some data types the printed form provides additional information.
   (error 'variable-counts "~s ~s ~s" nr-of-special-vars nr-of-borrowed-vars nr-of-clean-vars))
 
 The @elemref["environment"]{clean environment} contains
-@(roman (number->string nr-of-clean-vars)) variables of which
-@(roman (number->string (- nr-of-clean-vars nr-of-special-vars)))
-contain objects directly borrowed from @(Rckt) and
-@(roman (number->string nr-of-special-vars)) are
+@(roman (number->string nr-of-clean-vars)) variables.
+@(roman (number->string (- nr-of-clean-vars nr-of-special-vars))) of them
+are directly borrowed from @(Rckt) and
+@(roman (number->string nr-of-special-vars)) of them are
 special variables with objects provided by @nbr[simplisp].
 Procedure @nbpr{clean-vars}
 returns a sorted list of the names of all clean variables.
 Procedure @nbpr{borrowed-vars}
 returns a sorted list of the names of all borrowed variables.
 These lists are too long to present here.
+
 @elemtag{simplisp-variables}
 Procedure @nbpr{special-vars} returns a sorted list of the names of the
 @(roman (number->string nr-of-special-vars))
