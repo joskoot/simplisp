@@ -1336,8 +1336,3 @@
 #| The end.
 
 aap noot mies wim zus jet teun vuur gijs lam kees bok weide does hok duif schapen |#
-(simplisp
- '(let-values (((a b c) (values 1 2 3)))
-   (set!-values (a b c) (values 10 20 30))))
-
-
