@@ -196,4 +196,8 @@
     (list (set!-values (a b c) (values 10 20 30)) a b c))))
  '((1 2 3 10 20 30)))
 
-(test-report)
+(test 26 ((  simplisp `(,source-code  '(,source-code  '(add1 3))))) '(4))
+(test 27 ((((simplisp    source-code)    source-code) '(add1 3)))   '(4))
+(test 28 ((( simplisp    source-code) `(,source-code  '(add1 3))))  '(4))
+
+(time (test-report))
