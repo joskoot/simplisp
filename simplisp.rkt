@@ -283,11 +283,11 @@
          ((and (null? vars) (null? vals)) '())
          ((null? vars)
           (error 'application
-           "too many actual args~n  formals: ~s~n  actuals: ~s"
+           "more actual args than formal ones~n  formals: ~s~n  actuals: ~s"
            formals actuals))
          ((null? vals)
           (error 'application
-           "unsatisfied formal args~n  formals: ~s~n  actuals: ~s"
+           "more formal args than actual ones~n  formals: ~s~n  actuals: ~s"
            formals actuals))
          (else
           (cons (car vars)
