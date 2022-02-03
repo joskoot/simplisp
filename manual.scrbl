@@ -45,7 +45,7 @@ in @nb{a proper} intersection of the implemented language and
 @nbhl["file:///C:/Program%20Files/Racket/doc/reference/index.html"]{@tt{racket/base}}.
 Simplisp does no compilation and has no expansion phase prior to the evaluation proper.
 Macro calls are interpreted on the fly during evaluation.
-Macros are first class run-time data. 
+Macros are first class run-time data.
 They can be passed around in run-time variables and new ones can be created at run-time,
 just like procedures.
 Simplisp is eager.
