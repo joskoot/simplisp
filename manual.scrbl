@@ -921,27 +921,32 @@ Fulfills a @nber["make-promise"]{promise}.
 If @nbr[promise] is not a promise, it is returned as is.
 If @nbr[promise] is a promise results depend on its @nbpr{promise-state}.
 
-If the @nbpr{promise-state} is @nbr['delay] the state is changed to @nbr['running],
+@itemlist[
+@item{@nbpr{promise-state} @nbr['delay]@(lb)
+The state is changed to @nbr['running],
 the thunk in its content is called,
 the content is replaced by the value returned by the thunk
 and this value is returned as the value of the @nbpr{force}-form
 while the state is changed to @nbr['forced]. 
 The result can be a promise.
 If the thunk raises an exception, the content is replaced by this exception,
-the state is set to @nbr['error] and finally the exception is raised again.
+the state is set to @nbr['error] and finally the exception is raised again.}
 
-If the @nbpr{promise-state} is @nbr['lazy]
-the @nbr[promise] is forced as described for state
+@item{@nbpr{promise-state} @nbr['lazy]@(lb)
+The @nbr[promise] is forced as described for state
 @nbr['delay],@(lb)but if the result is a promise,
 the latter is forced recursively in tail position.@(lb)
-Hence, in fact a lazy promise is fulfilled more eagerly than a delayed promise.
+Hence, in fact a lazy promise is fulfilled more eagerly than a delayed promise.}
 
-If the @nbpr{promise-state} is @nbr['forced] the content is returned.
+@item{@nbpr{promise-state} @nbr['forced]@(lb)
+The content is returned.}
 
-If the @nbpr{promise-state} is @nbr['error] the exception memorized in the content
-is raised again.
+@item{@nbpr{promise-state}@nbr['error]@(lb)
+The exception memorized in the content
+is raised again.}
 
-If the @nbpr{promise-state} is @nbr['running] an exception is raised.
+@item{@nbpr{promise-state}@nbr['running]@(lb)
+An exception is raised.}]
 
 @Interaction[
 (simplisp
