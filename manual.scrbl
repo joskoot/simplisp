@@ -223,22 +223,24 @@ See the @nber["null-form"]{related documentation}.}]}
 (simplisp (cons 1 2))]
 
 @Interaction[
+(simplisp '(1 . 2))]
+
+@Interaction[
+(simplisp #(1 2 3))]
+
+@Interaction[
 (simplisp add1)]
 
 @Interaction[
 (simplisp (λ (x) x))]
 
 @Interaction[
-(simplisp '(simplisp (1 . 2)))]
-
-@Interaction[
-(simplisp '(simplisp #:keyword))]
-
-@Interaction[
-(simplisp '(simplisp (λ ())))]
+(simplisp '(λ ()))]
 
 @Interaction[
 (simplisp '(simplisp lambda))]
+
+The empty list is self-evaluating too:
 
 @Interaction[
 (simplisp '())]
