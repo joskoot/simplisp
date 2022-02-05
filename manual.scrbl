@@ -511,11 +511,17 @@ but not all of each other's data.
 @nber["closure?"]{closures}.
 @nb{They recognize} each other's closures as procedures, though:
 
-@Interaction[
+@Interaction*[
+(require simplisp/simplisp)
 (define simplisp1 (simplisp source-code))
-(define closure (simplisp '(λ ())))
+(define closure (simplisp '(λ (x y) (add1 (* x y)))))
 (simplisp  `(list (procedure? ,closure) (closure? ,closure)))
 (simplisp1 `(list (procedure? ,closure) (closure? ,closure)))]
+Nevertheless, the closure can be used both in @nbr[simplisp] and @tt{simplisp1} and even in @(Rckt):
+@Interaction*[
+(simplisp  `(,closure 3 4))
+(simplisp1 `(,closure 3 4))
+(closure 3 4)]
 
 Distinct instances of @nbr[simplisp] do not recognize each other's macros:
 
