@@ -105,6 +105,11 @@ It is much smaller and much simpler. @nb{It's a toy}.
 @itemlist[#:style 'ordered
 @item{Macros are first class run-time data, just like procedures.
 
+@Interaction[(simplisp '((lambda (and/or) (and/or 1 2)) and))]
+@Interaction[(simplisp '((lambda (and/or) (and/or 1 2)) or))]
+@Interaction[(simplisp '((lambda (b) ((if b and or) 1 2)) #t))]
+@Interaction[(simplisp '((lambda (b) ((if b and or) 1 2)) #f))]
+
 @Interaction[
 (simplisp '(values lambda (macro? lambda)))]
 @Interaction[
