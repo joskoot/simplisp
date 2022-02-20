@@ -1311,7 +1311,10 @@ More interesting is a macro that implements a realy new form.
 @Elemtag{macro?}
 @defproc[#:kind "predicate" (macro? (x any/x)) boolean?]{
 Returns @nbr[#t] if the argument is a predefined macro of @nbr[simplisp]
-or a macro made with macro @nbpr{macro} or procedure @nbpr{make-macro}, else @nbr[#f].}
+or a macro made with macro @nbpr{macro} or procedure @nbpr{make-macro}, else @nbr[#f].
+@Interaction[(simplisp '(macro? lambda))]
+@Interaction[(simplisp '(macro? (macro ())))]
+@Interaction[(simplisp '(macro? 1))]}
 
 @Elemtag{make-macro}
 @defproc[(make-macro (proc (-> list? #,(nbpr "env?") any/c))) #,(nbpr "macro?")]{
