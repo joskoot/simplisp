@@ -357,7 +357,7 @@ Data can be exchanged between @nbr[simplisp] and @(Rckt),
 including procedures, lists, vectors, characters, strings, boxes, sets, hash-tables,
 multiple values and much more.
 
-Procedures can be exchanged between @(Rckt) and @(nbr simplisp).@(lb)
+Forcing a running promise or a promise @(Rckt) and @(nbr simplisp).@(lb)
 For example, a procedure made by @(nbr simplisp) can be called from @(Rckt):
 
 @Interaction[
@@ -980,7 +980,7 @@ Forcing a running promise or a promise with @nbpr{promise-state} @nbr['error] yi
 (simplisp `(promise-state ,x))
 (code:line (simplisp `(force ,x)) (code:comment #,(red "Yields an error.")))
 (simplisp `(promise-state ,x))
-(code:line (simplisp `(force ,x)) (code:comment #,(red "Yields the same error again.")))]}
+(code:line (simplisp `(force ,x)) (code:comment #,(red "Yields the same error again.")))]
 
 @Elemtag{global-define}
 @defform*[#:kind "macro" ((global-define id expr)
