@@ -212,7 +212,7 @@ yields the same as:
 Whether or not, when, how and in which order arguments are evaluated in case of @nb{a macro} call,
 depends on the macro and its arguments.
 New macros can be made at run time with procedure @nbpr{make-macro} and macro @nbpr{macro}.
-Macros are first class data and can be passed around, just like procedures:
+Macros are first class data and can be passed around at run time, just like procedures:
 
 @Interaction[
 (simplisp '(map (λ (op) (op 1 2)) (list or and)))
