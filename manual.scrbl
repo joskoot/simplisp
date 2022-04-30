@@ -24,11 +24,13 @@
 Includes trace options, but with Racket CS the options
 @nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}
 cannot be used when simplisp traces its own source code
-as in @nb{@tt{(@nbr[simplisp] '(@nber["trace"]{trace} 'all) @nbr[source-code])}}.
+as in @nb{@tt{(@nbr[simplisp] '(@nber["trace-option"]{trace-option} 'all) @nbr[source-code])}}.
 In Racket CS this causes causes @(Rckt) to exit within a few seconds without any explanation.
 Works well with Racket BC and Racket versions up to and including 7.9.
 Problems with parameterization with Racket CS 8.0 and up.
-No tracing problems with any other code not including the @nbr[source-code].}
+No tracing problems with any other code not including the @nbr[source-code].
+
+Matthew Flatt has found the cause of the problem and has promised to fix it.}
 
 @section[#:tag "1"]{Introduction}
 @;Module @hyperlink["simplisp.rkt"]{simplisp.rkt} provides:
