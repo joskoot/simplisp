@@ -359,7 +359,6 @@ Data can be exchanged between @nbr[simplisp] and @(Rckt),
 including procedures, lists, vectors, characters, strings, boxes, sets, hash-tables,
 multiple values and much more.
 
-Forcing a running promise or a promise @(Rckt) and @(nbr simplisp).@(lb)
 For example, a procedure made by @(nbr simplisp) can be called from @(Rckt):
 
 @Interaction[
