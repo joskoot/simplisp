@@ -966,9 +966,9 @@ If the @nbpr{promise-state} is @nbr['running] an exception is raised.
 
 In a nest of delayed and lazy promises, forcing continues until:
 
-the result is not a promise or@(lb)
-is a promise but not with state @nbr['lazy] or @nbr['delay] or@(lb)
-the innermost promise that has been forced had state @nbr['delay].}
+@inset{• the result is not a promise or@(lb)
+• is a promise but not with state @nbr['lazy] or @nbr['delay] or@(lb)
+• the innermost promise that has been forced had state @nbr['delay].}}
 
 @Interaction[
 (simplisp '(force (lazy (lazy (delay 'yes)))))
@@ -1780,7 +1780,7 @@ Example:
 With Racket CS the options @nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}
 cannot be used when simplisp traces its own source code.
 Works well with Racket BC and Racket versions up to and including 7.9.
-Problems with parameterization with Racket CS 8.0 and up.}}
+Problems with @nbr[prop:object-name] with Racket CS 8.0 and up.}}
 
 @Elemtag{trace-selfi}
 @defparam*[trace-selfi on/off any/c boolean? #:value #f]{See @nbpr{trace-option}.}
