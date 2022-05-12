@@ -1528,9 +1528,10 @@ Therefore they are not @nbrl[eq?]{eq} to the original.
 
 @tt{
 @(hspace 3)(@nbr[simplisp]@(lb)
-@(hspace 3)'(@nbpr{let} ((@tt{unquote-splicing} 4) (@tt{unquote} @nbr[add1]))@(lb)
-@(hspace 4)`(a b unquote (@tt{unquote-splicing} (@nbr[map] unquote '(0 1 2 3)))@(lb)
-@(hspace 6)(unquote (unquote unquote-splicing)))))}@(lb)
+@(hspace 4)(@nbpr{quote}@(lb)
+@(hspace 5)(@nbpr{let} ((@tt{unquote-splicing} 4) (@tt{unquote} @nbr[add1]))@(lb)
+@(hspace 6)(@nbpr{quasiquote} (a b unquote (@tt{unquote-splicing} (@nbr[map] unquote '(0 1 2 3)))@(lb)
+@(hspace 7)(unquote (unquote unquote-splicing)))))))}@(lb)
 @(hspace 3)@blue{@tt{(a b unquote 1 2 3 4 5)}}
 
 The following is exacly the same, but almost unreadable for the human eye because of
