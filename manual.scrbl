@@ -28,7 +28,6 @@ as in @nb{@tt{(@nbr[simplisp] '(@nber["trace-option"]{trace-option} 'all) @nbr[s
 In Racket CS this causes causes @(Rckt) to exit within a few seconds without any explanation.
 Works well with Racket BC and Racket versions up to and including 7.9.
 Problems with @nbr[prop:object-name] in Racket CS 8.0 and up.
-No tracing problems with any other code not including the @nbr[source-code].
 @(lb)@(lb)
 Matthew Flatt has found the cause of the problem and has promised to fix it.}
 
@@ -1776,7 +1775,6 @@ Example:
   (let* ((a 11) (b (* 2 a)))
    (set! a (+ a b))
    (values a b (+ a b)))))]
-
 
 @note{@red{WARNING}@(lb)
 With Racket CS the options @nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}
