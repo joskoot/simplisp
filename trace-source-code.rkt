@@ -4,7 +4,7 @@
 
 ; WARNING
 ;
-; Running this module produces almost 100000 lines of output.
+; Running this module produces more than 100000 lines of output.
 ; Maximum line length 90.
 
 (if (eq? (system-type 'vm) 'racket)
