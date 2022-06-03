@@ -266,7 +266,7 @@
       (cond
        (bx
         (let ((old (unbox bx)))
-         (when ($trace-assgn)
+         (when (and ($trace-option) ($trace-assgn))
           (print-truncated "~a : ASSGN : ~s = ~s <- ~a = ~a" #f id value id old))
           (set-box! bx (infer-name id value)) old))
        (else (error 'assignment
