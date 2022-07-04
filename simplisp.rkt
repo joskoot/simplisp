@@ -347,7 +347,7 @@
       ((descr constr pred acc mut)
        (make-struct-type
         'promise    ; name
-        super-type  ; no super-type type
+        super-type
         2           ; fields: state and content, name already in super-type.
         0           ; no auto fields
         #f          ; auto value n.a.
@@ -745,7 +745,7 @@
               "list expected as value of: ~s~n  value: ~s"
               (cadr head) lst))
             (append lst (qq tail env n)))))
-         (cons (list qq-symbol (qq (cadr head) env (sub1 n))) (qq tail env n)))))
+         (cons (list uqs-symbol (qq (cadr head) env (sub1 n))) (qq tail env n)))))
       ((pair? x) (cons (qq (car x) env n) (qq (cdr x) env n)))
       ((vector? x)
        (let ((lst (qq (vector->list x) env n)))
@@ -780,6 +780,16 @@
      (register-put! 'lambda #f macro)
      (register-put! 'λ #f macro) ; Register synonym λ too.
      proc))
+
+   ((@rec-lambda)
+    (register-put! 'rec-lambda 'macro
+     (λ (uargs env)
+      (let*
+       ((name (car uargs))
+        (proc-env (extend-env env (list name) (list $undefined)))
+        (proc (@lambda (cdr uargs) proc-env)))
+       (proc-env name proc)
+       proc))))
 
    ((@macro)
     (register-put! 'macro 'macro

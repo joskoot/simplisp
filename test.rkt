@@ -1,6 +1,7 @@
 #lang racket
 
 (require simplisp/simplisp test/test)
+;(require "simplisp.rkt" test/test)
 
 (define (resetted-simplisp . x) (apply simplisp '(reset) x))
 
@@ -199,5 +200,7 @@
 (test 26 ((  simplisp `(,source-code  '(,source-code  '(add1 3))))) '(4))
 (test 27 ((((simplisp    source-code)    source-code) '(add1 3)))   '(4))
 (test 28 ((( simplisp    source-code) `(,source-code  '(add1 3))))  '(4))
+
+(test 29 ((resetted-simplisp '((rec-lambda ! (n) (if (zero? n) 1 (* n (! (sub1 n))))) 6))) '(720))
 
 (time (test-report))

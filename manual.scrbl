@@ -1600,6 +1600,13 @@ used by @nbpr{racket}.
 (simplisp '(racket-reset))
 (simplisp '(racket 'add1))]}
 
+@Elemtag{rec-lambda}
+@defmacro[(rec-lambda name formals expr ...)
+#:grammar
+((name id)
+ (formals (id ...) (id ...+ . id) id))]{
+Same as @nbr[(letrec ((name (lambda formals expr ...))) name)].}
+
 @Elemtag{reset}
 @defproc[(reset) void?]{
 Resets the @seclink["4"]{internal state} of @nbr[simplisp].}
