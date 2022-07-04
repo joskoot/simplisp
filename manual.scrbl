@@ -1605,7 +1605,12 @@ used by @nbpr{racket}.
 #:grammar
 ((name id)
  (formals (id ...) (id ...+ . id) id))]{
-Same as @nbr[(letrec ((name (lambda formals expr ...))) name)].}
+Same as @nbr[(letrec ((name (lambda formals expr ...))) name)].
+Is like @nbr[(lambda formals expr ...)]
+but with the @nbr[name] bound to the procedure within its body.
+For example:
+@Interaction[
+(simplisp '((rec-lambda ! (n) (if (zero? n) 1 (* n (! (sub1 n))))) 6))]}
 
 @Elemtag{reset}
 @defproc[(reset) void?]{
