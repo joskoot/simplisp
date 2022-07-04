@@ -80,6 +80,9 @@ although some of them can be much slower than others.
 
 @section[#:tag "meta-recursion"]{Meta-recursion}
 
+@nbrl[simplisp]{Simplisp} is meta-recursive.
+This means that it can evaluate its own @nbr[source-code]
+resulting in an equivalent but possibly much slower interpeter.
 @nbrl[simplisp]{Simplisp} is meta-recursive in strong sense,
 that is, both left associative and right associative:
 

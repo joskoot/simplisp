@@ -15,15 +15,31 @@
 
 @(define curdir (current-directory))
 
-@(define-syntax-rule (Interaction x ...)
-  (interaction #:eval (make-base-eval #:lang '(begin (require racket "simplisp.rkt")
-                                                     (print-as-expression #f))) x ...))
+@(print-reader-abbreviations #f)
+@(print-as-expression #f)
 
-@(define-syntax-rule (Interaction* x ...)
+@(define-syntax-rule
+  (Interaction x ...)
+  (interaction
+   #:eval
+   (make-base-eval
+    #:lang
+    '(begin
+      (require racket "simplisp.rkt")
+      (print-reader-abbreviations #f)
+      (print-as-expression #f))) x ...))
+
+@(define-syntax-rule
+  (Interaction* x ...)
   (interaction #:eval evaller x ...))
 
-@(define (make-evaller) (make-base-eval #:lang '(begin (require racket "simplisp.rkt")
-                                                (print-as-expression #f))))
+@(define (make-evaller)
+ (make-base-eval
+  #:lang
+  '(begin
+    (require racket "simplisp.rkt")
+    (print-reader-abbreviations #f)
+    (print-as-expression #f))))
 
 @(define evaller (make-evaller))
 
@@ -67,22 +83,22 @@
 @(define test-block (make-parameter "yet to be constructed"))
 @(define (get-simplisp-val var) (simplisp `,var))
 
-@(define Void (let ((x
-@seclink["void" #:doc '(lib "scribblings/reference/reference.scrbl") (nb (tt "#<void>"))]))
-              (λ () x)))
+@(define Void
+  (let ((x @seclink["void" #:doc '(lib "scribblings/reference/reference.scrbl") (nb (tt "#<void>"))]))
+                   (λ () x)))
 
 @(define-syntax-rule (Tabular-with-linebreaks ((e ...) ... (le ...)) . rest)
-  (Tabular (((list e (lb) (hspace 1)) ...) ... (le ...)) . rest))
+                     (Tabular (((list e (lb) (hspace 1)) ...) ... (le ...)) . rest))
 
 @(define (make-color-style color)
-  (define prop:color (color-property color))
-  (define color-style (style #f (list prop:color)))
-  (lambda elems (element 'roman (element color-style elems))))
+         (define prop:color (color-property color))
+         (define color-style (style #f (list prop:color)))
+         (lambda elems (element 'roman (element color-style elems))))
 
 @(define (make-ttcolor-style color)
-  (define prop:color (color-property color))
-  (define color-style (style #f (list prop:color)))
-  (lambda elems (element 'tt (element color-style elems))))
+         (define prop:color (color-property color))
+         (define color-style (style #f (list prop:color)))
+         (lambda elems (element 'tt (element color-style elems))))
 
 @(define red       (make-color-style   "red"))
 @(define green     (make-color-style   "green"))
@@ -97,4 +113,4 @@
 @(define (Rckt) (nbhl "https://docs.racket-lang.org/reference/index.html" "Racket"))
 
 @(define (keyword . x)
-  (apply seclink "keywords" #:doc '(lib "scribblings/reference/reference.scrbl") x)) 
+         (apply seclink "keywords" #:doc '(lib "scribblings/reference/reference.scrbl") x)) 
