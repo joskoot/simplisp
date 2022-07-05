@@ -1608,7 +1608,7 @@ used by @nbpr{racket}.
 Same as @nbr[(letrec ((name (lambda formals expr ...))) name)].
 Also same as:
 @racketblock[
-(let ((name undefined))
+(let ((name #,(nbpr "undefined")))
  (set! name (lambda formals expr ...))
  name)]
 Is like @nbr[(lambda formals expr ...)]
