@@ -1606,6 +1606,11 @@ used by @nbpr{racket}.
 ((name id)
  (formals (id ...) (id ...+ . id) id))]{
 Same as @nbr[(letrec ((name (lambda formals expr ...))) name)].
+Also same as:
+@racketblock[
+(let ((name undefined))
+ (set! name (lambda formals expr ...))
+ name)]
 Is like @nbr[(lambda formals expr ...)]
 but with the @nbr[name] bound to the procedure within its body.
 For example:
