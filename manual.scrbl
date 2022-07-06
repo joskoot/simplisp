@@ -1495,6 +1495,7 @@ Like in @(Rckt).}
 @Elemtag{promise-state}
 @defproc[(promise-state (promise any/c)) (or/c 'lazy 'delay 'forced 'error 'running #f)]{
 Returns the state of a @nber["make-promise"]{promise} or @nbr[#f] if the argument is not a promise.
+Works for promise types made with @nbpr{make-promise-type} too.
 
 @Interaction[
 (simplisp
@@ -1511,7 +1512,8 @@ Returns the state of a @nber["make-promise"]{promise} or @nbr[#f] if the argumen
 @Elemtag{promise?}
 @defproc[#:kind "predicate"
 (promise? (x any/c)) boolean?]{
-Predicate for @nber["make-promise"]{promises}.}
+Predicate for @nber["make-promise"]{promises} of the predefined promise type.
+Each promise type made with @nbpr{make-promise-type} has its own predicate.}
 
 @(define quasiquote-comment
   (black "Read this as " @tt{((unquote 1) (unquote-splicing add1))}))
