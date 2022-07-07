@@ -20,17 +20,6 @@
 @(defmodule simplisp/simplisp #:packages ())
 @;@(defmodule "simplisp.rkt" #:packages ())
 
-@note{@smaller{@smaller{@red{@smaller{@bold{WARNING}}}}}@(lb)
-Includes trace options, but with Racket CS the options
-@nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}
-cannot be used when simplisp traces its own source code
-as in @nb{@tt{(@nbr[simplisp] '(@nber["trace-option"]{trace-option} 'all) @nbr[source-code])}}.
-In Racket CS this causes causes @(Rckt) to exit within a few seconds without any explanation.
-Works well with Racket BC and Racket versions up to and including 7.9.
-Problems with @nbr[prop:object-name] in Racket CS 8.0 and up.
-@(lb)@(lb)
-Matthew Flatt has found the cause of the problem and has promised to fix it.}
-
 @section[#:tag "1"]{Introduction}
 @;Module @hyperlink["simplisp.rkt"]{simplisp.rkt} provides:
 Module @hyperlink["../../simplisp.rkt"]{simplisp.rkt} provides:
@@ -1796,13 +1785,7 @@ Example:
 '(parameterize* ((trace-width 65) (trace-option 'all))
   (let* ((a 11) (b (* 2 a)))
    (set! a (+ a b))
-   (values a b (+ a b)))))]
-
-@note{@red{WARNING}@(lb)
-With Racket CS the options @nbpr{trace-value}, @nbpr{trace-assgn} and @nbpr{trace-varef}
-cannot be used when simplisp traces its own source code.
-Works well with Racket BC and Racket versions up to and including 7.9.
-Problems with @nbr[prop:object-name] with Racket CS 8.0 and up.}}
+   (values a b (+ a b)))))]}
 
 @Elemtag{trace-selfi}
 @defparam*[trace-selfi on/off any/c boolean? #:value #f]{See @nbpr{trace-option}.}
