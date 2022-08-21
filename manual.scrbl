@@ -1185,7 +1185,8 @@ after all @nbr[id]s already have been bound
 possibly shadowing already existing bindings.
 After an @nbr[expr]s has been evaluated its value is assigned to the
 corresponding @nbr[id] before evaluating the next @nbr[expr].
-Subsequently the @nbr[body-expr]s are evaluated. Allows recursion:
+After all @nbr[expr]s have been evaluated and assigned,
+the @nbr[body-expr]s are evaluated. Allows recursion:
 
 @Interaction[
 (simplisp
