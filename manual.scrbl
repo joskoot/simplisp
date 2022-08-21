@@ -213,7 +213,7 @@ Macros are first class data and can be passed around at run time, just like proc
 
 @item{@bold{Null-form}@(lb)
 For recollection of a value from the clean environment, bypassing the local environment.
-See the @nber["null-form"]{related documentation}.
+See @nber["null-form"]{special form null}.
 @Interaction[(simplisp '(let ((add1 #f)) ((()add1) 3)))]}]}
 
 @item{Everything else than a symbol or a non-empty proper list is self-evaluating.
