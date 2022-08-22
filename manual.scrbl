@@ -1473,7 +1473,8 @@ There are several tricks to bypass all local bindings. The simplest one is:
 @inset{@tt{((() @nbpr{with-env}) @nbr[#f] @italic{expr} ...)}}}
             
 @Elemtag{or}
-@defproc*[#:kind "macro" (((or) #f) ((or (expr any/c) ... (last-expr any)) (or/c any/c any)))]{
+@defform*[#:kind "macro" ((or) (or expr ... last-expr))
+          #:contracts ((expr any/c) (last-expr any))]{
 The @tt{@italic{exprs}} are evaluated from left to right and the value of the first one that is not
 @nbr[#f] is returned, skipping the evaluation of the remaining @tt{@italic{exprs}} and the
 @nbr[last-expr].
