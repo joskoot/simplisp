@@ -2,13 +2,29 @@
 
 (provide simplisp source-code)
 
+;=====================================================================================================
+; A meta-recursive interpreter. Documentation can eb made from "manual.scrbl".
+;=====================================================================================================
+; Syntax |define-with-source-code| gets an expression and defines both the quoted expression and its
+; value. The syntax is not realy necessary, because the quoted sourcde-code can be evaluated as in
+; (eval source-code (make-base-namespace). However, including the source-code only would inhibit
+; DrRacket to show binding information and hyperlinks to documentation when background expansion is
+; enabled or the Check Syntax button is selected.
+
 (define-syntax-rule
  (define-with-source-code (simplisp source-code)         expr        )
  (define-values           (simplisp source-code) (values expr 'expr)))
 
+;=====================================================================================================
+; The source-code consiste of one single expression.
+
 (define-with-source-code (simplisp source-code)
 
  (letrec-values
+
+  ; The |register| is used to gather variable names and their values to be included in the clean
+  ; top-level environment of the interpreter. The names of procedures and macros to be included in the
+  ; clean top-environment begin with a dollar sign.
 
   (((register) '())
 
@@ -27,7 +43,8 @@
      ;    enter-in-clean-environment!
      ;    rename
      ;    clean-set!
-     ; clean-set! is the only procedure mutating the clean-namespace.
+     ; |clean-set|! is the only procedure mutating the clean-namespace.
+     ; It is not part odthe implemented language.
      ; Return sorted list of all special variables (for procedure $special-vars)
      (sort (map car register) symbol<?)))
 
@@ -44,6 +61,12 @@
       ((super) (set-super-type-name! object name) object)
       ((macro) ($make-macro name object))
       (else (error 'source-code "unknown renamer: ~s~n  for variable: ~s" renamer name)))))
+
+   ;==================================================================================================
+   ; Environments: three levels:
+   ; local : bindings added while interpreting a bindings form.
+   ; predefined : Defined within the present letrec form. Part of the top-environment.
+   ; borrowed : Directly borrowed from a base-namespace. Part of the top-environment.
 
    ((clean-environment) (make-base-namespace))
 
@@ -84,6 +107,9 @@
      (λ (uargs env)
       (sort (hash-keys (env-hash env)) symbol<?))))
 
+   ;==================================================================================================
+   ; Procedure allowing an escape to evaluation by racket's procedure eval.
+
    ((racket-eval $make-list $call-with-values)
     (let* ((racket-eval (clean-ref 'eval)))
      (parameterize* ((current-namespace clean-environment)) ; Use racket-eval here for the require-
@@ -94,6 +120,9 @@
      (register-put! 'else #f 'else)
      (values racket-eval (clean-ref 'make-list) (clean-ref 'call-with-values))))
    
+   ;==================================================================================================
+   ; Tracing-options allow the user to make the interpreter show its steps of evaluation.
+
    ((trace-option-guard)
     (λ (x)
      (case x
@@ -130,6 +159,10 @@
     (register-put! 'trace-option #f
      (make-parameter #f trace-option-guard 'trace-option)))
 
+   ;==================================================================================================
+   ; Supertype for all objects represented by structs. Used as supertype for all predefined procedures
+   ; and macros in the clean environment.
+   
    ((inspector) (make-sibling-inspector))
 
    ((super-type super-type? super-type-name set-super-type-name!)
@@ -152,6 +185,10 @@
       (make-struct-field-accessor acc 0 'name)
       (make-struct-field-mutator  mut 0 'name))))
 
+   ;==================================================================================================
+   ; A closure is a struct with procedure property made when the interpreter encounters |lambda|
+   ; or |λ|.
+   
    ((make-closure $closure?)
     (let*-values
      (((printer)
@@ -172,6 +209,9 @@
         #f)))    ; no guard
      (values constr (register-put! 'closure? #f pred))))
 
+   ;==================================================================================================
+   ; A macro is a struct with procedure property made for a syntactic form.
+   
    (($make-macro $macro? macro-proc)
     (let*-values
      (((printer)
@@ -204,6 +244,9 @@
       (register-put! 'macro? #f pred)
       (make-struct-field-accessor acc 0 'proc))))
 
+   ;==================================================================================================
+   ; Structs for environments, also with procedure property.
+
    ((env-type make-env $env? env-hash)
     (let*-values
      (((printer)
@@ -217,16 +260,16 @@
          (else (env-set! env id (car wrapped-optional-value))))))
       ((descr constr pred acc mut)
        (make-struct-type
-        'env  ; type-name
-        super-type ;
-        1     ; nr of fields, immutable hasheq, name already in super-type
-        0     ; no auto fields
-        #f    ; auto-value n.a.
+        'env     ; type-name
+        super-type
+        1        ; nr of fields, immutable hasheq, name already in super-type
+        0        ; no auto fields
+        #f       ; auto-value n.a.
         (list (cons prop:custom-write printer))
         inspector
-        env-proc
-        '()   ; immutable hasheq
-        #f))) ; no guard
+        env-proc ; procedure-property
+        '()      ; immutable hasheq
+        #f)))    ; no guard
      (values descr constr
       (register-put! 'env? #f pred)
       (make-struct-field-accessor acc 0 'hash))))
@@ -267,7 +310,8 @@
        (bx
         (let ((old (unbox bx)))
          (when (and ($trace-option) ($trace-assgn))
-          (print-truncated "~a : ASSGN : ~s = ~s <- ~a = ~a" #f id value id old))
+           (parameterize* (($trace-option #f))
+          (print-truncated "~a : ASSGN : ~s = ~s <- ~a = ~a" #f id value id old)))
           (set-box! bx (infer-name id value)) old))
        (else (error 'assignment
         "allowed for locally bound vars only~n  var : ~s~n  value : ~s"
@@ -362,6 +406,8 @@
       (make-struct-field-mutator mut 0 'state)
       (make-struct-field-mutator mut 1 'content))))
 
+   ; Procedure |make-promise-type| defines distinct promise types.
+   
    (($make-promise-type)
     (register-put! 'make-promise-type 'proc
      (λ (name)
@@ -406,6 +452,8 @@
 
    ((->string) (λ (x) (if (string? x) x (symbol->string x))))
 
+   ; Procedure |selective-force| forces promises with the specified predicate only.
+
    ((selective-force)
     (λ (p pred)
      (cond
@@ -448,6 +496,8 @@
       (set-promise-state! p 'running)
       (call-with-exception-handler (promise-exn-handler p) (promise-content p))))
 
+    ; Enter predefined promise type in the register.
+
    ((ignore-0)
     (let-values
      (((make-promise promise? delay lazy force) ($make-promise-type 'promise)))
@@ -456,6 +506,8 @@
      (register-put! 'delay 'super delay)
      (register-put! 'lazy  'super lazy)
      (register-put! 'force 'proc force)))
+
+   ; Procedure |make-stream-type| defines distinct stream types.
 
    (($make-stream-type)
     (register-put! 'make-stream-type 'proc
@@ -523,6 +575,8 @@
         stream-pair?
         stream-null)))))
 
+   ; Enter predefined stream type in the register.
+
    ((ignore-1)
     (let-values
      (((stream-lazy
@@ -545,6 +599,8 @@
      (register-put! 'stream-pair? #f stream-pair?)
      (register-put! 'stream-null  #f stream-null)))
 
+   ; The main function.
+
    ((simplisp)
     (register-put! 'simplisp #f
      (procedure-rename
@@ -558,6 +614,8 @@
            ((null? exprs) (*eval expr $empty-env))
            (else (*eval expr $empty-env) (loop (car exprs) (cdr exprs))))))))
      'simplisp)))
+
+   ; Evaluation.
 
    ((*eval)
     (λ (expr env)
@@ -623,8 +681,9 @@
         (let ((vals ($call-with-values (λ () (normal-eval expr env)) list)))
          (unless (or (not (and ($trace-option) ($trace-finis)))
                      (and ($trace-start) (= id (sub1 trace-id))))
-          (print-truncated "~a : FINIS : ~s" id expr))
+          (parameterize* (($trace-option #f)) (print-truncated "~a : FINIS : ~s" id expr)))
          (when (and ($trace-option) ($trace-value))
+           (parameterize (($trace-option #f))
           (case (length vals)
            ((0) (print-truncated "~a : NOVAL" id))
            ((1) (print-truncated "~a : VALUE : ~s" id (car vals)))
@@ -632,13 +691,15 @@
             (let loop ((vals vals) (i 1))
              (unless (null? vals)
               (print-truncated "~a : MULTV : ~s : ~s" id i (car vals))
-              (loop (cdr vals) (add1 i)))))))
+              (loop (cdr vals) (add1 i))))))))
          (apply values vals))))
       (else
        (when (and ($trace-option) ($trace-selfi))
         (parameterize* (($trace-option #f))
          (print-truncated "~a : SELFI : ~s" #f expr)))
        expr))))
+
+   ; Trace options.
 
    ((bool-param-guard) (λ (x) (and x #t)))
 
@@ -697,6 +758,8 @@
        (n (string-length str)))
       (printf "~a~n" (if (and m (> n m)) (string-append (substring str 0 m) " ...") str)))))
 
+   ; Macros.
+
    ((@begin)
     (let
      ((begin
@@ -707,7 +770,7 @@
      (register-put! 'begin 'macro begin)
      begin))
 
-   ((begin-help)
+   ((begin-help) ; Make sure the last expression is evaluated in tail position.
     (λ (kar kdr env)
      (cond
       ((null? kdr) (*eval kar env))
@@ -719,7 +782,7 @@
       (check-quote uargs)
       (car uargs))))
 
-   ((@quasiquote)
+   ((@quasiquote) ; recurs on immutable lists, immutable and mutable boxes and vectors.
     (register-put! 'quasiquote 'macro
      (λ (uargs env)
       (qq (car uargs) env 0))))
@@ -764,6 +827,8 @@
    ((uq-symbol)  'unquote)
    ((uqs-symbol) 'unquote-splicing)
 
+   ; Env is a macro returning the current envronment, the local bindings included.
+
    ((@env)
     (register-put! 'current-env 'macro
      (λ (uargs env) env)))
@@ -791,10 +856,12 @@
        (proc-env name proc)
        proc))))
 
+   ; Macro |macro| (simple form like in Common Lisp)
+
    ((@macro)
     (register-put! 'macro 'macro
      (λ (uargs env)
-    #;(check-macro-uags uargs)
+    #;(check-macro-uargs uargs)
      (let ((formals (car uargs)) (body (cdr uargs)))
       (let ((proc (@lambda uargs env)))
        ($make-macro #f
@@ -853,7 +920,7 @@
        (let loop ((vars vars) (exprs exprs))
         (cond
          ((null? vars) (@begin body env))
-         (else
+         (else ; Assign the values to the already bound variables.
           (env (car vars) (*eval (car exprs) env))
           (loop (cdr vars) (cdr exprs)))))))))
 
@@ -902,7 +969,7 @@
        (let loop ((id-lists id-lists) (exprs exprs))
         (cond
          ((null? exprs) (@begin body env))
-         (else
+         (else ; Assign the values to the already bound variables.
           (for-each (λ (id val) (env id val)) (car id-lists)
            (eval-to-list (car exprs) env))
           (loop (cdr id-lists) (cdr exprs)))))))))
@@ -1001,7 +1068,7 @@
        ((null? uargs) #t)
        (else (and-help (car uargs) (cdr uargs) env))))))
 
-   ((and-help)
+   ((and-help) ; Make sure that the last argument, when reached is evaluated in tail position.
     (λ (uarg uargs env)
      (cond
       ((null? uargs) (*eval uarg env))
@@ -1015,7 +1082,7 @@
        ((null? uargs) #f)
        (else (or-help (car uargs) (cdr uargs) env))))))
 
-   ((or-help)
+   ((or-help) ; Make sure that the last argument, when reached is evaluated in tail position.
     (λ (uarg uargs env)
      (cond
       ((null? uargs) (*eval uarg env))
@@ -1024,6 +1091,9 @@
         (cond
          (val val)
          (else (or-help (car uargs) (cdr uargs) env))))))))
+
+   ; Procedure |eval-to-list| allows multiple values as arguments in a procedur or macro call.
+   ; The values are traeted as separate arguments.
 
    ((eval-to-list)
     (λ (uarg env)
@@ -1061,6 +1131,8 @@
         (for-each env ids vals)
         (apply values old-vals))))))
 
+   ; Procedure |reset| resets all of the preserved internal state of the interpreter.
+
    (($reset)
     (register-put! 'reset 'proc
      (λ ()
@@ -1075,6 +1147,8 @@
       (set! racket-namespace (make-racket-namespace))
       ($current-global-table ($empty-global-table))
       (void))))
+
+  ; Evaluation in user specified environment.
 
    ((@with-env)
     (register-put! 'with-env 'macro
@@ -1094,7 +1168,7 @@
 
    (($eval)
     (register-put! 'eval 'proc
-     (λ (expr . wrapped-env)
+     (λ (expr . wrapped-env) ; rest argument for optional argument env.
       (check-eval-env-arg wrapped-env)
       (let*
        ((env (if (null? wrapped-env) $empty-env (car wrapped-env))))
@@ -1108,6 +1182,8 @@
 
    ((racket-namespace) (make-racket-namespace))
 
+   ; Evaluation by racket.
+
    (($racket)
     (register-put! 'racket 'proc
      (λ exprs
@@ -1116,7 +1192,7 @@
        ((null? (cdr exprs)) (racket-eval (car exprs) racket-namespace))
        (else (racket-eval (car exprs) racket-namespace) (apply $racket (cdr exprs)))))))
 
-   (($racket-reset)
+   (($racket-reset) ; Resets the namespace used by procedure |racket|.
     (register-put! 'racket-reset 'proc
      (λ () (set! racket-namespace (make-racket-namespace)))))
 
@@ -1151,6 +1227,8 @@
      (λ (uargs env)
     #;(check-trace-uargs)
       (parameterize* (($trace-option (*eval (car uargs) env))) (@begin (cdr uargs) env)))))
+
+   ; Global tables: Binding variables independently from the environment.
 
    ((make-global-table $global-table? global-table-hash)
     (let*-values
@@ -1298,6 +1376,8 @@
          (vals (map global-ref global-ids)))
         (@begin body (extend-env env local-ids vals)))))))
 
+   ; Helper procedures. To do: complete procedures that check arguments.
+
    ((quote-uargs?) (λ (x) (= (length x) 1)))
    ((lambda-uargs?) (λ (x) (and (pair? x) (formals? (car x)))))
    ((named-let?) (λ (x) (and (pair? x) (symbol? (car x)) (bound-list? (cadr x)))))
@@ -1338,6 +1418,10 @@
    ((check-eval-env-arg) void)
    ((check-global-ref)    (make-check 'global-vars-ref void))
    ((check-global-define) (make-check 'global-vars-set! void))
+
+   ; Make the clean top-environment after the register is complete.
+   ; The bindings have been collected in variable |register|
+   ; by means of procedure |enter-in-clean-environment!|.
 
    ((special-var-names) (fill-clean-environment!)))
 
