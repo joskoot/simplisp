@@ -1498,7 +1498,7 @@ Works for promise types made with @nbpr{make-promise-type} too.
      (λ ()
       (printf "state while being forced  : ~s~n" (promise-state p)) 'value))))
   (printf     "state before forcing      : ~s~n" (promise-state p))
-  (printf     "value when forcing        : ~s~n" (force p))
+  (printf     "value after forcing       : ~s~n" (force p))
   (printf     "state after forcing       : ~s~n" (promise-state p))
   (printf     "value after forcing again : ~s~n" (force p))))]}
                                                                      
