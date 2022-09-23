@@ -56,7 +56,7 @@ it receives the values of its arguments.
 @nbrl[simplisp]{Simplisp} evaluates the top-expressions from left to right and
 returns the value or multiple value of the last one.
 When called without arguments, procedure @nbr[simplisp] immediately returns @(Void).
-The procedure is available as @nb{a @seclink["7"]{predefined variable}}
+The procedure is available in @nb{a @seclink["7"]{predefined variable}}
 within @nbr[simplisp] itself too.}
 
 @elemtag{source-code}
@@ -1496,10 +1496,9 @@ Works for promise types made with @nbpr{make-promise-type} too.
   ((p
     (make-promise 'p 'lazy
      (λ ()
-      (printf "state while being forced  : ~s~n" (promise-state p))
-      'value))))
+      (printf "state while being forced  : ~s~n" (promise-state p)) 'value))))
   (printf     "state before forcing      : ~s~n" (promise-state p))
-  (printf     "value after forcing       : ~s~n" (force p))
+  (printf     "value when forcing        : ~s~n" (force p))
   (printf     "state after forcing       : ~s~n" (promise-state p))
   (printf     "value after forcing again : ~s~n" (force p))))]}
                                                                      
