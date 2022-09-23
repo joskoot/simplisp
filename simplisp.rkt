@@ -1,7 +1,5 @@
 #lang racket/base
 
-; Adapated such as to avoid duplicate tracing when evaluating the source-code.
-
 (provide simplisp source-code)
 
 ;=====================================================================================================
@@ -1218,10 +1216,10 @@
         (predicates (map car boundlist))
         (handlers (map cadr boundlist))
         (predicate/handlers
-         (map (λ (binding) (*eval (car binding) env) (*eval (cadr binding) env)) boundlist)))
+         (map (λ (binding) (cons (*eval (car binding) env) (*eval (cadr binding) env))) boundlist)))
        (let loop ((predicate/handlers (reverse predicate/handlers)))
         (if (null? predicate/handlers) (@begin body env)
-         (with-handlers* (((caar predicate/handlers) (cadar predicate/handlers)))
+         (with-handlers* (((caar predicate/handlers) (cdar predicate/handlers)))
           (loop (cdr predicate/handlers)))))))))
 
    ((@trace)
@@ -1432,3 +1430,4 @@
 #| The end.
 
 aap noot mies wim zus jet teun vuur gijs lam kees bok weide does hok duif schapen |#
+
