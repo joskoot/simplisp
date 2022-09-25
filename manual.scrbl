@@ -29,6 +29,8 @@ Module @hyperlink["../../simplisp.rkt"]{simplisp.rkt} provides:
  ("symbolic expression"  @nbr[source-code]))
 #:sep (hspace 3)]}
 
+
+
 Simplisp is a @seclink["meta-recursion"]{meta-recursive} interpreter.
 Its source-code consists of one single symbolic expression
 in @nb{a proper} intersection of the implemented language and
@@ -113,8 +115,12 @@ It is much smaller and much simpler. @nb{It's a toy}.
      (let ((lst (reverse lst)))
       (cons (car lst) (reverse (cdr lst))))))
    (postfix
-    (macro (x) (list-shift-circular-right x))))
-  (values postfix (macro? postfix) (postfix (1 2 3 +)))))]
+    (macro (x)
+     (list-shift-circular-right x))))
+  (values
+   postfix
+   (macro? postfix)
+   (postfix (1 2 3 +)))))]
 @Interaction[
 (simplisp
 '(let* ((function lambda) (2j+1 (function (j) (add1 (* 2 j)))))
@@ -719,7 +725,7 @@ and it does not even need a binding.}
 
 @Elemtag{catch-exn}
 @defmacro[(catch-exn catcher expr ...)
-#:contracts ((catcher (-> exn:fail? any)))]{
+#:contracts ((catcher (-> any/c any)))]{
 Same as
 @inset{@tt{(@nbpr{with-handlers*} @nbr[((exn:fail? catcher))] @nbr[expr] ...)}}
 First @nbr[catcher] is evaluated.
@@ -1790,7 +1796,9 @@ Example:
 '(parameterize* ((trace-width 65) (trace-option 'all))
   (let* ((a 11) (b (* 2 a)))
    (set! a (+ a b))
-   (values a b (+ a b)))))]}
+   (values a b (+ a b)))))]
+
+}
 
 @Elemtag{trace-selfi}
 @defparam*[trace-selfi on/off any/c boolean? #:value #f]{See @nbpr{trace-option}.}
