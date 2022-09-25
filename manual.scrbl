@@ -1481,7 +1481,8 @@ There are several tricks to bypass all local bindings. The simplest one is:
 @Elemtag{or}
 @defform*[#:kind "macro" ((or) (or expr ... last-expr))
           #:contracts ((expr any/c) (last-expr any))]{
-The @tt{@italic{exprs}} are evaluated from left to right and the value of the first one that is not
+Returns @nbr[#f] when called without arguments. Otherwise,
+the @tt{@italic{exprs}} are evaluated from left to right and the value of the first one that is not
 @nbr[#f] is returned, skipping the evaluation of the remaining @tt{@italic{exprs}} and the
 @nbr[last-expr].
 If all @tt{@italic{exprs}} yield @nbr[#f], the @nbr[last-expr] is evaluated in tail position and
