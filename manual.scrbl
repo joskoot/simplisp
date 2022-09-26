@@ -29,8 +29,6 @@ Module @hyperlink["../../simplisp.rkt"]{simplisp.rkt} provides:
  ("symbolic expression"  @nbr[source-code]))
 #:sep (hspace 3)]}
 
-
-
 Simplisp is a @seclink["meta-recursion"]{meta-recursive} interpreter.
 Its source-code consists of one single symbolic expression
 in @nb{a proper} intersection of the implemented language and
@@ -1442,7 +1440,7 @@ Example: fibonacci stream:
 
 @elemtag{null-form}
 @deftogether[
-(@defidform[#:kind "value" null]
+(@defthing[#:kind "value" null null? #:value ()]
  @defform[#:kind "special form" #:link-target? #f (null id)])]{
 @nber["null-form"]{null} is a predefined variable containing the empty list.@(lb)
 Because the empty list is self-evaluating, the special form can also be written as:
