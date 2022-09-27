@@ -1797,7 +1797,26 @@ Example:
    (set! a (+ a b))
    (values a b (+ a b)))))]
 
-}
+Tracing the evaluation of the @nbr[source-code] produces much output:
+@Interaction[
+(require
+  (only-in racket
+    file-size
+    file->lines
+    delete-file))
+(simplisp
+  '(trace-width 100)
+  '(trace-align 6)
+  '(trace-option 'all))
+(define temp-file-path "temp-trace-file.tobediscarded")
+(define port (open-output-file temp-file-path))
+(parameterize ((current-output-port port)) (simplisp source-code))
+(flush-output port)
+(close-output-port port)
+(define nr-of-bytes (file-size temp-file-path))
+(define nr-of-lines (length (file->lines temp-file-path)))
+(delete-file temp-file-path)
+(values nr-of-bytes nr-of-lines)]}
 
 @Elemtag{trace-selfi}
 @defparam*[trace-selfi on/off any/c boolean? #:value #f]{See @nbpr{trace-option}.}
