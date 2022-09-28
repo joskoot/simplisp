@@ -3,13 +3,15 @@
 (provide simplisp source-code)
 
 ;=====================================================================================================
-; A meta-recursive interpreter. Documentation can eb made from "manual.scrbl".
+; A meta-recursive interpreter. Documentation can be made from "manual.scrbl".
 ;=====================================================================================================
 ; Syntax |define-with-source-code| gets an expression and defines both the quoted expression and its
 ; value. The syntax is not realy necessary, because the quoted sourcde-code can be evaluated as in
-; (eval source-code (make-base-namespace). However, including the source-code only would inhibit
-; DrRacket to show binding information and hyperlinks to documentation when background expansion is
-; enabled or the Check Syntax button is selected.
+;
+;   (eval source-code (make-base-namespace))
+;
+; However, including the source-code only inhibits DrRacket to show binding information and hyperlinks
+; to documentation when background expansion is enabled or the Check Syntax button is selected.
 
 (define-syntax-rule
  (define-with-source-code (simplisp source-code)         expr        )
@@ -23,8 +25,8 @@
  (letrec-values
 
   ; The |register| is used to gather variable names and their values to be included in the clean
-  ; top-level environment of the interpreter. The names of procedures and macros to be included in the
-  ; clean top-environment begin with a dollar sign.
+  ; top-level environment of the interpreter. The names of macros to be included in the clean top-
+  ; environment begin with and and those of procedures with $.
 
   (((register) '())
 
@@ -33,8 +35,12 @@
      (set! register (cons (list name renamer object) register))
      object))
 
-   ((fill-clean-environment!) ; Places special variables in the clean-environment and
-    (λ ()                     ; returns a sorted list of the names of all special variables.
+   ; |fill-clean-environment is called at the very and of the source.code.
+   ; It places special variables in the clean-environment and
+   ; returns a sorted list of the names of all special variables.
+
+   ((fill-clean-environment!)
+    (λ ()                   
      (for-each enter-in-clean-environment! register)
      ; At the end of the source-code the following will become garbage:
      ;    register
@@ -44,7 +50,7 @@
      ;    rename
      ;    clean-set!
      ; |clean-set|! is the only procedure mutating the clean-namespace.
-     ; It is not part odthe implemented language.
+     ; It is not part of the implemented language.
      ; Return sorted list of all special variables (for procedure $special-vars)
      (sort (map car register) symbol<?)))
 
@@ -159,9 +165,67 @@
     (register-put! 'trace-option #f
      (make-parameter #f trace-option-guard 'trace-option)))
 
-   ;==================================================================================================
-   ; Supertype for all objects represented by structs. Used as supertype for all predefined procedures
-   ; and macros in the clean environment.
+   ((bool-param-guard) (λ (x) (and x #t)))
+
+   (($trace-start)
+    (register-put! 'trace-start #f (make-parameter #f bool-param-guard 'trace-start)))
+
+   (($trace-finis)
+    (register-put! 'trace-finis #f (make-parameter #f bool-param-guard 'trace-finis)))
+
+   (($trace-value)
+    (register-put! 'trace-value #f (make-parameter #f bool-param-guard 'trace-value)))
+
+   (($trace-varef)
+    (register-put! 'trace-varef #f (make-parameter #f bool-param-guard 'trace-varef)))
+
+   (($trace-assgn)
+    (register-put! 'trace-assgn #f (make-parameter #f bool-param-guard 'trace-assgn)))
+
+   (($trace-selfi)
+    (register-put! 'trace-selfi #f (make-parameter #f bool-param-guard 'trace-selfi)))
+
+   ((trace-align-guard)
+    (λ (x)
+     (unless (exact-nonnegative-integer? x)
+      (raise-argument-error 'trace-align "(list/c natural? natural?)" x))
+     x))
+
+   ((trace-width-guard)
+    (λ (x)
+     (unless (or (not x) (exact-nonnegative-integer? x))
+      (raise-argument-error 'trace-width "(or/c #f natural?)" x))
+     x))
+
+   ((default-align default-width trace-id) (values 4 #f 0))
+
+   (($trace-align)
+    (register-put! 'trace-align #f
+     (make-parameter default-align  trace-align-guard 'trace-align)))
+
+   (($trace-width)
+    (register-put! 'trace-width #f (make-parameter default-width trace-width-guard 'trace-width)))
+
+   ((trace-id-align)
+    (λ (id)
+     (if id
+      (string-append
+       (let* ((str (format "~a" id)) (n (string-length str)))
+        (string-append (make-string (max 0 (- ($trace-align) n)) #\space) str)))
+      (make-string ($trace-align) #\space))))
+
+   ((print-truncated)
+    (λ (fmt id . rest)
+     (let*
+      ((m ($trace-width))
+       (str (apply format fmt (trace-id-align id) rest))
+       (n (string-length str)))
+      (printf "~a~n" (if (and m (> n m)) (string-append (substring str 0 m) " ...") str)))))
+
+   ;================================================================================================
+   ; Supertype for all objects represented by structs.
+   ; Used for all predefined procedures and macros in the clean environment.
+   ; Contains a field for inferred name.
    
    ((inspector) (make-sibling-inspector))
 
@@ -171,7 +235,7 @@
        (make-struct-type
         'super-type ; type-name
         #f          ; no super-type
-        1           ; fields: name (other fields to be provided by sub-types)
+        1           ; fields: inferred name (other fields to be provided by sub-types)
         0           ; no auto fields
         #f          ; auto value n.a.
         (list
@@ -185,9 +249,9 @@
       (make-struct-field-accessor acc 0 'name)
       (make-struct-field-mutator  mut 0 'name))))
 
-   ;==================================================================================================
-   ; A closure is a struct with procedure property made when the interpreter encounters |lambda|
-   ; or |λ|.
+   ;================================================================================================
+   ; A closure is a struct with procedure property made when
+   ; the interpreter encounters |lambda| or |λ|.
    
    ((make-closure $closure?)
     (let*-values
@@ -210,7 +274,7 @@
      (values constr (register-put! 'closure? #f pred))))
 
    ;==================================================================================================
-   ; A macro is a struct with procedure property made for a syntactic form.
+   ; A macro is a struct with procedure, made for a syntactic form and by macro macro.
    
    (($make-macro $macro? macro-proc)
     (let*-values
@@ -219,7 +283,7 @@
         (parameterize* (($trace-option #f))
          (fprintf port "#<macro:~s>" (super-type-name macro)))))
       ((guard)
-       (λ (name macro-proc ignore)
+       (λ (name macro-proc ignore-supertype-name)
         (unless (or (symbol? name) (not name))
          (raise-argument-error 'make-macro
           "(or/c symbol? #f)" 0 name macro-proc))
@@ -244,7 +308,7 @@
       (register-put! 'macro? #f pred)
       (make-struct-field-accessor acc 0 'proc))))
 
-   ;==================================================================================================
+   ;================================================================================================
    ; Structs for environments, also with procedure property.
 
    ((env-type make-env $env? env-hash)
@@ -348,7 +412,7 @@
      (λ (env)
       (make-env #f
        (make-immutable-hasheq
-        (hash-map (env-hash env)
+        (hash-map (env-hash env) ; cannot use hash-copy, because the copy must have fresh boxes.
          (λ (var bx) (cons var (box (unbox bx))))))))))
 
    (($undefined $undefined?)
@@ -500,12 +564,12 @@
 
    ((ignore-0)
     (let-values
-     (((make-promise promise? delay lazy force) ($make-promise-type 'promise)))
-     (register-put! 'make-promise #f make-promise)
-     (register-put! 'promise? #f promise?)
-     (register-put! 'delay 'super delay)
-     (register-put! 'lazy  'super lazy)
-     (register-put! 'force 'proc force)))
+     ((($make-promise $promise? @delay @lazy $force) ($make-promise-type 'promise)))
+     (register-put! 'make-promise #f $make-promise)
+     (register-put! 'promise? #f $promise?)
+     (register-put! 'delay 'super @delay)
+     (register-put! 'lazy  'super @lazy)
+     (register-put! 'force 'proc $force)))
 
    ; Procedure |make-stream-type| defines distinct stream types.
 
@@ -579,25 +643,25 @@
 
    ((ignore-1)
     (let-values
-     (((stream-lazy
-        stream-cons
-        stream
-        stream-car
-        stream-cdr
-        stream?
-        stream-null?
-        stream-pair?
-        stream-null)
+     (((@stream-lazy
+        @stream-cons
+        @stream
+        $stream-car
+        $stream-cdr
+        $stream?
+        $stream-null?
+        $stream-pair?
+        $stream-null)
        ($make-stream-type 'stream)))
-     (register-put! 'stream-lazy  #f stream-lazy)
-     (register-put! 'stream-cons  #f stream-cons)
-     (register-put! 'stream       #f stream)
-     (register-put! 'stream-car   #f stream-car)
-     (register-put! 'stream-cdr   #f stream-cdr)
-     (register-put! 'stream?      #f stream?)
-     (register-put! 'stream-null? #f stream-null?)
-     (register-put! 'stream-pair? #f stream-pair?)
-     (register-put! 'stream-null  #f stream-null)))
+     (register-put! 'stream-lazy  #f @stream-lazy)
+     (register-put! 'stream-cons  #f @stream-cons)
+     (register-put! 'stream       #f @stream)
+     (register-put! 'stream-car   #f $stream-car)
+     (register-put! 'stream-cdr   #f $stream-cdr)
+     (register-put! 'stream?      #f $stream?)
+     (register-put! 'stream-null? #f $stream-null?)
+     (register-put! 'stream-pair? #f $stream-pair?)
+     (register-put! 'stream-null  #f $stream-null)))
 
    ; The main function.
 
@@ -683,7 +747,7 @@
                      (and ($trace-start) (= id (sub1 trace-id))))
           (parameterize* (($trace-option #f)) (print-truncated "~a : FINIS : ~s" id expr)))
          (when (and ($trace-option) ($trace-value))
-           (parameterize (($trace-option #f))
+           (parameterize* (($trace-option #f))
           (case (length vals)
            ((0) (print-truncated "~a : NOVAL" id))
            ((1) (print-truncated "~a : VALUE : ~s" id (car vals)))
@@ -698,65 +762,6 @@
         (parameterize* (($trace-option #f))
          (print-truncated "~a : SELFI : ~s" #f expr)))
        expr))))
-
-   ; Trace options.
-
-   ((bool-param-guard) (λ (x) (and x #t)))
-
-   (($trace-start)
-    (register-put! 'trace-start #f (make-parameter #f bool-param-guard 'trace-start)))
-
-   (($trace-finis)
-    (register-put! 'trace-finis #f (make-parameter #f bool-param-guard 'trace-finis)))
-
-   (($trace-value)
-    (register-put! 'trace-value #f (make-parameter #f bool-param-guard 'trace-value)))
-
-   (($trace-varef)
-    (register-put! 'trace-varef #f (make-parameter #f bool-param-guard 'trace-varef)))
-
-   (($trace-assgn)
-    (register-put! 'trace-assgn #f (make-parameter #f bool-param-guard 'trace-assgn)))
-
-   (($trace-selfi)
-    (register-put! 'trace-selfi #f (make-parameter #f bool-param-guard 'trace-selfi)))
-
-   ((trace-align-guard)
-    (λ (x)
-     (unless (exact-nonnegative-integer? x)
-      (raise-argument-error 'trace-align "(list/c natural? natural?)" x))
-     x))
-
-   ((trace-width-guard)
-    (λ (x)
-     (unless (or (not x) (exact-nonnegative-integer? x))
-      (raise-argument-error 'trace-width "(or/c #f natural?)" x))
-     x))
-
-   ((default-align default-width trace-id) (values 4 #f 0))
-
-   (($trace-align)
-    (register-put! 'trace-align #f
-     (make-parameter default-align  trace-align-guard 'trace-align)))
-
-   ((trace-width)
-    (register-put! 'trace-width #f (make-parameter default-width trace-width-guard 'trace-width)))
-
-   ((trace-id-align)
-    (λ (id)
-     (if id
-      (string-append
-       (let* ((str (format "~a" id)) (n (string-length str)))
-        (string-append (make-string (max 0 (- ($trace-align) n)) #\space) str)))
-      (make-string ($trace-align) #\space))))
-
-   ((print-truncated)
-    (λ (fmt id . rest)
-     (let*
-      ((m (trace-width))
-       (str (apply format fmt (trace-id-align id) rest))
-       (n (string-length str)))
-      (printf "~a~n" (if (and m (> n m)) (string-append (substring str 0 m) " ...") str)))))
 
    ; Macros.
 
@@ -1099,7 +1104,7 @@
     (λ (uarg env)
      ($call-with-values (λ () (*eval uarg env)) list)))
 
-   ((@parameterize)
+   ((@parameterize*)
     (register-put! 'parameterize* 'macro
      (λ (uargs env)
       (check-parameterize* uargs)
@@ -1143,7 +1148,7 @@
       ($trace-value #f)
       ($trace-assgn #f)
       ($trace-align default-align)
-      (trace-width default-width)
+      ($trace-width default-width)
       (set! racket-namespace (make-racket-namespace))
       ($current-global-table ($empty-global-table))
       (void))))
@@ -1255,7 +1260,7 @@
    ((global-table-guard)
     (λ (x)
      (unless ($global-table? x)
-      (raise-argument-error 'global-vars "global-vars?" x))
+      (raise-argument-error 'global-vars "global-table?" x))
      x))
 
    (($empty-global-table)
@@ -1306,7 +1311,7 @@
        (for-each (λ (id val) (env id val) (hash-set! h id (infer-name id val))) ids vals)
        (apply values vals)))))
 
-   (($global-set!)
+   ((@global-set!)
     (register-put! 'global-set! 'macro
      (λ (uargs env)
      ;(check-global-set!)
@@ -1352,7 +1357,7 @@
     (register-put! 'global-vars 'proc
      (λ () (sort (hash-keys (global-table-hash ($current-global-table))) symbol<?))))
 
-   (($global-remove!)
+   ((@global-remove!)
     (register-put! 'global-remove! #f
      ($make-macro 'global-remove!
       (λ (uargs env)
@@ -1364,7 +1369,7 @@
       (hash-remove! hash (car ids))
       (global-remove-help (cdr ids) hash))))
 
-   (($global-let)
+   ((@global-let)
     (register-put! 'global-let #f
      ($make-macro 'global-let
       (λ (uargs env)
