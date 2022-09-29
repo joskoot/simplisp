@@ -465,7 +465,7 @@ Using a simplisp environment in Racket:
 @section[#:tag "4"]{Internal state}
 
 @nbrl[simplisp]{Simplisp} has internal state of which the following elements are
-preserved between successive calls to @nbr[simplisp]:
+preserved between successive @nbrl[simplisp]{top-expressions} and successive calls to @nbr[simplisp]:
 
 @inset{@Tabular[(("parameter" @nbpr{trace-option})
                  ("parameter" @nbpr{trace-align})
