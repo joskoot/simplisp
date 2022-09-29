@@ -673,6 +673,20 @@ in which case @nbr[#f] is returned and the remaining @tt{@italic{exprs}} and the
 are not evaluated. If none of the @tt{@italic{exprs}} yields @nbr[#f],
 the @nbr[last-expr] is evaluated in tail position and its value or multiple value is returned.}
 
+@Elemtag{base-env}
+@defthing[#:kind "value" base-env #,(nbpr "env?")]{
+Variable containing the unique @elemref["environment"]{environment} with empty local layer.
+It includes the clean environment, though.
+@Interaction[
+(simplisp '(eq? (current-env) base-env))]
+@Interaction[
+(simplisp '(base-env 'list))]}
+
+@Elemtag{base-env?}
+@defproc[(base-env? (obj any/c)) boolean?]{
+Returns @nbr[#t] if the @nbr[obj] is the unique @elemref["environment"]{environment}
+with empty local layer, else returns @nbr[#f].}
+
 @Elemtag{begin}
 @defmacro[(begin expr ...)]{
 The @tt{@italic{exprs}} are evaluated from left to right ignoring their values
@@ -786,7 +800,7 @@ of the last one is returned.}
 @Elemtag{copy-env}
 @defproc[(copy-env (env #,(nbpr "env?"))) #,(nbpr "env?")]{
 Returns a copy of an environment as returned by macro @nbpr{current-env} or procedure
-@nbpr{empty-env}.
+@nbpr{base-env}.
 Assignments in the copy are not effective in the original and vice versa.}
 
 @Elemtag{copy-global-table}
@@ -880,20 +894,6 @@ Same as
 Can be used for the @tt{@italic{else-clause}} in a @nbpr{cond}-form
 (provided it is not rebound to @nbr[#f]).}
 
-@Elemtag{empty-env}
-@defthing[#:kind "value" empty-env #,(nbpr "env?")]{
-Variable containing the unique @elemref["environment"]{environment} with empty local layer.
-It includes the clean environment, though.
-@Interaction[
-(simplisp '(eq? (current-env) empty-env))]
-@Interaction[
-(simplisp '(empty-env 'list))]}
-
-@Elemtag{empty-env?}
-@defproc[(empty-env? (obj any/c)) boolean?]{
-Returns @nbr[#t] if the @nbr[obj] is the unique @elemref["environment"]{environment}
-with empty local layer, else returns @nbr[#f].}
-
 @Elemtag{empty-global-table}
 @defproc[(empty-global-table) #,(nbpr "global-table?")]{
 Returns an empty @elemref["global table"]{global table}.}
@@ -902,10 +902,10 @@ Returns an empty @elemref["global table"]{global table}.}
 @defproc[#:kind "predicate" (env? (x any/c)) boolean?]{
 Returns @nbr[#t] if @nbr[x] is an environment as returned by macro @nbpr{current-env},
 else returns @nbr[#f].@(lb)
-Also yields @nbr[#t] for @nbpr{empty-env}.}
+Also yields @nbr[#t] for @nbpr{base-env}.}
 
 @Elemtag{eval}
-@defproc[(eval (expr any/c) (env #,(nbpr "env?") #,(nbpr "empty-env"))) any/c]{
+@defproc[(eval (expr any/c) (env #,(nbpr "env?") #,(nbpr "base-env"))) any/c]{
 The @nbr[expr] is evaluated with the specified @nbr[env].
 
 @Interaction[
@@ -914,7 +914,7 @@ The @nbr[expr] is evaluated with the specified @nbr[env].
   (eval '(list add1 sub1) (current-env))))
 (simplisp
 '(let ((add1 1) (sub1 2))
-  (eval '(list add1 sub1) empty-env)))]}
+  (eval '(list add1 sub1) base-env)))]}
 
 @(define force-comment (black @tt{(@nbpr{lazy} @nbr['yes])} " is not forced."))
 @Elemtag{force}
@@ -1866,7 +1866,7 @@ Same as @nb{(@nbpr{begin} @nbr[expr] @(tt "..."))} but each @nbr[expr] evaluated
 @elemref["environment"]{environment}:
 
 @inset{@Tabular[((@nbr[env]   "environment")
-                 (@nbr[#f]    @elemref["empty-env"]{empty local environment})
+                 (@nbr[#f]    @elemref["base-env"]{empty local environment})
                  (@nbr[#t]    @elemref["current-env"]{the current environment})
                  (@nbr['copy] @elemref["copy-env"]{a copy of the current environment})
                  (@nbpr{env?} "this environment.")) #:sep (hspace 2)
