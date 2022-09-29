@@ -674,7 +674,7 @@ are not evaluated. If none of the @tt{@italic{exprs}} yields @nbr[#f],
 the @nbr[last-expr] is evaluated in tail position and its value or multiple value is returned.}
 
 @Elemtag{base-env}
-@defthing[#:kind "value" base-env #,(nbpr "env?")]{
+@defthing[#:kind "procedure" base-env #,(nbpr "env?")]{
 Variable containing the unique @elemref["environment"]{environment} with empty local layer.
 It includes the clean environment, though.
 @Interaction[
