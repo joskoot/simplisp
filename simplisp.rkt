@@ -1472,4 +1472,3 @@
 
 aap noot mies wim zus jet teun vuur gijs lam kees bok weide does hok duif schapen |#
 
-(simplisp '(stream-null? (stream-cdr (stream-cdr (stream 'a 'b)))))
