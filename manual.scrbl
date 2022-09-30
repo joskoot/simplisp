@@ -1439,7 +1439,38 @@ Example: fibonacci stream:
      (strm-cons 0
       (strm-cons 1
        (strm-map plus fibonacci (strm-cdr fibonacci))))))
-   (strm-take fibonacci 11))))]}
+   (strm-take fibonacci 11))))]
+
+Prime numbers (after The Little LISPer)
+
+@Interaction[
+(simplisp
+'(letrec
+  ((make-naturals
+    (λ (n)
+     (stream-cons n (make-naturals (add1 n)))))
+   (stream-filter
+    (λ (f strm)
+     (stream-lazy
+      (let ((kar (stream-car strm)))
+       (if (f kar)
+        (stream-cons kar (stream-filter f (stream-cdr strm)))
+        (stream-filter f (stream-cdr strm)))))))
+   (stream-take
+    (λ (strm n)
+     (if (zero? n) '()
+      (cons
+       (stream-car strm)
+       (stream-take (stream-cdr strm) (sub1 n))))))
+   (Q
+    (λ (strm n)
+     (stream-filter (λ (m) (not (zero? (remainder m n)))) strm)))
+   (P
+    (λ (strm)
+     (stream-cons 
+      (stream-car strm)
+      (P (Q (stream-cdr strm) (stream-car strm)))))))
+  (stream-take (P (make-naturals 2)) 10)))]}
 
 @elemtag{null-form}
 @deftogether[
