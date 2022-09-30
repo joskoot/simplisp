@@ -573,6 +573,7 @@ For some data types the printed form provides additional information.
   (writeln p)))]
 
 @Interaction[
+(simplisp '(current-env))
 (simplisp '(let* ((a 1) (e (current-env))) e))]
 
 @section[#:tag "7"]{Predefined variables}
