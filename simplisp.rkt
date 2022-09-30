@@ -120,13 +120,14 @@
 
      ;-----------------------------------------------------------------------------------------------
      ; Procedure allowing an escape to evaluation by racket's procedure eval.
+     ; Also put sort, apply, call-with-values and else in the clean-environment.
 
      ((racket-eval $make-list $call-with-values)
       (let* ((racket-eval (clean-ref 'eval)))
-        (parameterize* ((current-namespace clean-environment)) ; Use racket-eval here for the require-
-          (racket-eval '(require (only-in racket make-list)))) ; form, for in simplisp eval is another
-        (clean-set! 'sort sort)                                ; procedure. Using racket's eval here
-        (clean-set! 'apply apply)                              ; would destroy meta-recursivity.
+        (parameterize* ((current-namespace clean-environment))
+          (racket-eval '(require (only-in racket make-list))))
+        (clean-set! 'sort sort)
+        (clean-set! 'apply apply)
         (clean-set! 'call-with-values call-with-values)
         (register-put! 'else #f 'else)
         (values racket-eval (clean-ref 'make-list) (clean-ref 'call-with-values))))
@@ -137,7 +138,7 @@
      ((trace-option-guard)
       (λ (x)
         (case x
-          ((#f) x)
+          ((#f) #f)
           ((#t)
            (or
              ($trace-start)
@@ -172,23 +173,16 @@
 
      ((bool-param-guard) (λ (x) (and x #t)))
 
-     (($trace-start)
-      (register-put! 'trace-start #f (make-parameter #f bool-param-guard 'trace-start)))
+     ((make-trace-option)
+      (λ (name)
+        (register-put! name #f (make-parameter #f bool-param-guard name))))
 
-     (($trace-finis)
-      (register-put! 'trace-finis #f (make-parameter #f bool-param-guard 'trace-finis)))
-
-     (($trace-value)
-      (register-put! 'trace-value #f (make-parameter #f bool-param-guard 'trace-value)))
-
-     (($trace-varef)
-      (register-put! 'trace-varef #f (make-parameter #f bool-param-guard 'trace-varef)))
-
-     (($trace-assgn)
-      (register-put! 'trace-assgn #f (make-parameter #f bool-param-guard 'trace-assgn)))
-
-     (($trace-selfi)
-      (register-put! 'trace-selfi #f (make-parameter #f bool-param-guard 'trace-selfi)))
+     (($trace-start) (make-trace-option 'trace-start))
+     (($trace-finis) (make-trace-option 'trace-finis))
+     (($trace-value) (make-trace-option 'trace-value))
+     (($trace-varef) (make-trace-option 'trace-varef))
+     (($trace-assgn) (make-trace-option 'trace-assgn))
+     (($trace-selfi) (make-trace-option 'trace-selfi))
 
      ((trace-align-guard)
       (λ (x)
@@ -206,7 +200,7 @@
 
      (($trace-align)
       (register-put! 'trace-align #f
-        (make-parameter default-align  trace-align-guard 'trace-align)))
+        (make-parameter default-align trace-align-guard 'trace-align)))
 
      (($trace-width)
       (register-put! 'trace-width #f
@@ -230,8 +224,7 @@
             (if (and m (> n m)) (string-append (substring str 0 m) " ...") str)))))
 
      ;-----------------------------------------------------------------------------------------------
-     ; Supertype for all objects represented by structs.
-     ; Used for all predefined procedures and macros in the clean environment.
+     ; Supertype for closures, macros, environments, promises and streams.
      ; Contains a field for inferred name.
    
      ((inspector) (make-sibling-inspector))
@@ -412,7 +405,8 @@
 
      ((infer-name)
       (λ (name obj)
-        (when (and (super-type? obj) (not (super-type-name obj))) (set-super-type-name! obj name))
+        (when (and (super-type? obj) (not (super-type-name obj)))
+          (set-super-type-name! obj name))
         obj))
 
      (($copy-env)
@@ -624,13 +618,17 @@
                       (make-stream #f 'lazy (λ () (*eval (cadr uargs) env))))))))
              ((stream)
               ($make-macro (if (eq? type-name 'stream) 'stream (make-name type-name '-stream))
-                (λ (uargs env)
-                  (cond
-                    ((null? uargs) stream-null)
-                    (else
-                      (stream-cons
-                        (make-elem #f 'lazy (λ () (*eval (car uargs) env)))
-                        (stream (cdr uargs) env)))))))
+                (letrec
+                  ((strm-proc
+                     (λ (uargs env)
+                       (cond
+                         ((null? uargs) stream-null)
+                         (else
+                           (make-stream #f 'forced ; No need to delay the cons.
+                             (cons
+                               (make-elem #f 'lazy (λ () (*eval (car uargs) env)))
+                               (make-stream #f 'lazy (λ () (strm-proc (cdr uargs) env))))))))))
+                  strm-proc)))
              ((stream-car-name) (make-name type-name '-car))
              ((stream-car)
               (procedure-rename
@@ -737,8 +735,8 @@
      ((apply-op)
       (λ (op uargs env)
         (cond
-          ((procedure? op) (apply op (evalargs uargs env)))
           (($macro? op) ((macro-proc op) uargs env))
+          ((procedure? op) (apply op (evalargs uargs env)))
           ((null? op) (apply-null uargs))
           (else
             (error 'application
@@ -1464,7 +1462,7 @@
      ; Make the clean top-environment after the register is complete.
      ; The bindings have been collected in variable |register|
      ; by means of procedure |enter-in-clean-environment!|.
-     ; Procudure |fill-clean-environment!| returns a list of the names of all predefined variables.
+     ; Procedure |fill-clean-environment!| returns a list of the names of all predefined variables.
 
      ((special-var-names) (fill-clean-environment!)))
 
@@ -1474,3 +1472,4 @@
 
 aap noot mies wim zus jet teun vuur gijs lam kees bok weide does hok duif schapen |#
 
+(simplisp '(stream-null? (stream-cdr (stream-cdr (stream 'a 'b)))))

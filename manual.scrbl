@@ -572,6 +572,9 @@ For some data types the printed form provides additional information.
   (force p)
   (writeln p)))]
 
+@Interaction[
+(simplisp '(let* ((a 1) (e (current-env))) e))]
+
 @section[#:tag "7"]{Predefined variables}
 @(define Special-vars (simplisp '(special-vars)))
 @(define nr-of-special-vars (length Special-vars))
@@ -694,7 +697,7 @@ except the value or multiple value of the last @nbr[expr], which is returned.
 If no @nbr[expr] is present the result is
 @(Void).
 The last @nbr[expr] is evaluated in tail position.
-Hence, the last @nbr[expr] of a nested begin-form is evaluated in tail position too.}
+Hence, the last @nbr[expr] of a nested @nb{begin-form} is evaluated in tail position too.}
 
 @Elemtag{bindings}
 @defmacro[(bindings var) #:contracts ((var symbol?))]{
