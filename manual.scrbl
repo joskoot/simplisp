@@ -936,7 +936,7 @@ The result can be a promise.
 If the thunk raises an exception, the content is replaced by this exception,
 the state is set to @nbr['error] and finally the exception is raised again.
 
-If the @nbpr{promise-state} @nbr['lazy]
+If the @nbpr{promise-state} is @nbr['lazy]
 the @nbr[promise] is forced as described for state
 @nbr['delay],@(lb)but if the result is a promise,
 the latter is forced recursively in tail position.@(lb)
