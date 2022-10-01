@@ -842,6 +842,8 @@ An exception is raised if the variable has no local binding.
 
 It is not possible to alter a clean variable.
 
+@Interaction[(simplisp '(set! list #f))]
+
 @Interaction[
 (simplisp '((current-env) 'list vector))]}
 
