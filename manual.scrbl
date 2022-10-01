@@ -789,15 +789,16 @@ These are procedures made by macro @nbpr{lambda} or @nbpr{λ}.
 '(map (λ (x) (list (procedure? x) (closure? x))) (list add1 (λ ()))))]}
 
 @Elemtag{cond}
-@defmacro[(cond (test expr ...) ...)
+@defmacro[(cond clause ...)
+#:grammar ((clause (test expr ...)))
 #:contracts
 ((test any/c)
  (expr any))]{
 The @nbr[test]s are evaluated until one is found yielding a true value.
-The related clause is selected and the remaining ones are ignored.
-If none of the tests yields a true value, the @nbpr{cond}-form yields
+The related @nbr[clause] is selected and the remaining ones are ignored.
+If none of the @nbr[test]s yields a true value, the @nbpr{cond}-form yields
 @(Void).
-If the selected clause has no @nbr[expr]s, the value of the @nbr[test] is returned,
+If the selected @nbr[clause] has no @nbr[expr]s, the value of the @nbr[test] is returned,
 else the @nbr[expr]s are evaluated from left to right and the value or multiple value
 of the last one is returned.}
 
@@ -1442,7 +1443,7 @@ Example: fibonacci stream:
        (strm-map plus fibonacci (strm-cdr fibonacci))))))
    (strm-take fibonacci 11))))]
 
-Prime numbers (after The Little LISPer)
+Prime numbers (after exercise 9.10 of The Little LISPer)
 
 @Interaction[
 (simplisp
