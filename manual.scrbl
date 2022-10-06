@@ -90,6 +90,12 @@ Mixed association:
 @Interaction[
 ((simplisp source-code) `(,source-code '(add1 3)))]
 
+@(Rckt) is used as bootstrap in order to evaluate the @nbr[source-code]
+such as to produce the first instance of procedure @nbr[simplisp].
+A bootstrap is required, because the @nbr[source-code] by itself is not an interpreter.
+It's just a piece of text. The left associative meta-recursiveness is obtained
+by representing functions in a way compatible with the bootstrap.
+
 @section[#:tag "2"]{Simplisp ≠ Racket}
 
 @nbrl[simplisp]{Simplisp} differs very much from @(Rckt).
@@ -374,15 +380,14 @@ Using a @(Rckt) procedure as argument of @nbr[map] in @(nbr simplisp):
 (simplisp `(map ,plus*10 '(1 2 3) '(10 20 30) '(100 200 300)))
 (simplisp `(,map ,plus*10 '(1 2 3) '(10 20 30) '(100 200 300)))]
 
-The only difference between procedures of @(Rckt) and those of @(nbr simplisp)
-is that the latter always have @tt{#(struct:arity-at-least 0)}:
+@nber["closure?"]{Closures} always have @tt{#(struct:arity-at-least 0)}:
 
 @Interaction[
 (procedure-arity (λ (x y z) "who-cares?"))
 (procedure-arity (simplisp '(λ (x y z) "who-cares?")))
 (simplisp '(procedure-arity (λ (x y z) "who-cares?")))]
 
-This does not mean that a @(nbr simplisp) procedure
+This does not mean that a @nber["closure?"]{closure}
 does not check the number of its arguments:
 
 @Interaction[
