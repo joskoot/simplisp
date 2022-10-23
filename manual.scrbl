@@ -598,7 +598,7 @@ special variables with objects provided by @nbr[simplisp].
 Procedure @nbpr{clean-vars}
 returns a sorted list of the names of all clean variables.
 Procedure @nbpr{borrowed-vars}
-returns a sorted list of the names of all borrowed variables.
+returns a sorted list of the names of all borrowed variables.@(lb)
 These lists are too long to present here.
 
 @elemtag{simplisp-variables}
