@@ -1921,7 +1921,7 @@ Same as in @(Rckt), but the body @tt{@nbr[expr] ...} may be empty,
 in which case the form returns @(Void).}
 
 @Elemtag{λ}
-@defthing[#:kind "macro" λ #,(nbpr "macro?")]{
+@defthing[#:kind "macro" #:link-target? #f λ #,(nbpr "macro?")]{
 Synonym of @nbpr{lambda}.}
        
 @(bold (larger (larger "The end")))
